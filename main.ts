@@ -80,6 +80,37 @@ function startingVariables () {
     dialegsactive = false
     diabootsactive = false
 }
+function defaultAnimatePlayer () {
+    if (diamondSword) {
+        animation.runImageAnimation(
+        xTear,
+        playerAnimations[3][1],
+        175,
+        true
+        )
+    } else if (ironSword) {
+        animation.runImageAnimation(
+        xTear,
+        playerAnimations[2][1],
+        175,
+        true
+        )
+    } else if (GoldSword) {
+        animation.runImageAnimation(
+        xTear,
+        playerAnimations[1][1],
+        175,
+        true
+        )
+    } else {
+        animation.runImageAnimation(
+        xTear,
+        playerAnimations[0][1],
+        175,
+        true
+        )
+    }
+}
 function hugeLeap () {
     xTearLeapingSprite.setVelocity(63, -165)
     timer.after(25, function () {
@@ -964,6 +995,62 @@ function smallLeap () {
         })
     })
 }
+controller.up.onEvent(ControllerButtonEvent.Pressed, function () {
+    if (startsequence) {
+        if (!(mapActive)) {
+            upButtonPressed = true
+            if (TridentUnlocked && (!(TridentAttack) && (inair == 0 && canLeapingAttack && (!(blocking) && !(aiming) && attack == 0)))) {
+                holdingTrident = true
+                attack = 1
+                if (DiamondSet == 4) {
+                    animation.runImageAnimation(
+                    xTear,
+                    playerAnimations[3][11],
+                    100,
+                    true
+                    )
+                } else if (IronSet == 4) {
+                    animation.runImageAnimation(
+                    xTear,
+                    playerAnimations[2][11],
+                    100,
+                    true
+                    )
+                } else if (GoldSet == 4) {
+                    animation.runImageAnimation(
+                    xTear,
+                    playerAnimations[1][11],
+                    100,
+                    true
+                    )
+                } else {
+                    animation.runImageAnimation(
+                    xTear,
+                    playerAnimations[0][11],
+                    100,
+                    true
+                    )
+                }
+            }
+        }
+    } else {
+        if (saveMenu) {
+            if (saveSelection == 5) {
+                saveSelection = 1
+                saveSelectorSprite.setPosition(89, 198)
+                readSave()
+            } else {
+                saveSelection = 6
+                saveSelectorSprite.setPosition(166, 182)
+                timer.background(function () {
+                    story.clearAllText()
+                    story.spriteSayText(saveSelectorSprite, "Close?", 1, 10, story.TextSpeed.VeryFast)
+                })
+                readSave()
+            }
+        }
+    }
+})
 function StopBackgroundSequence () {
     sprites.destroyAllSpritesOfKind(SpriteKind.Caves)
     sprites.destroyAllSpritesOfKind(SpriteKind.Ceilings)
@@ -1000,6 +1087,7 @@ function EndBackgroundSequence () {
     End = true
 }
 function overwriteSave (saveFile: number) {
+    blockSettings.writeString("" + convertToText(saveFile) + "name", game.askForString("Save File Name", 9))
     blockSettings.writeNumberArray(convertToText(saveFile), [
     info.score(),
     levelUnlocked,
@@ -1007,13 +1095,17 @@ function overwriteSave (saveFile: number) {
     IronSet,
     GoldSet,
     NetheriteIngots,
-    commandblocksAvailable,
+    commandBlocksAvailable,
     WitherSkulls,
     EyesCollected,
     health,
     saturation
     ])
     boolUnlockDataArray = [
+    "f",
+    "f",
+    "f",
+    "f",
     "f",
     "f",
     "f",
@@ -1038,7 +1130,7 @@ function overwriteSave (saveFile: number) {
     if (totemOfUndying) {
         boolUnlockDataArray[4] = "t"
     }
-    if (petAllay) {
+    if (true) {
         boolUnlockDataArray[5] = "t"
     }
     if (TridentUnlocked) {
@@ -1047,13 +1139,13 @@ function overwriteSave (saveFile: number) {
     if (fireworkBowUpgrade) {
         boolUnlockDataArray[7] = "t"
     }
-    if (BedrockShield) {
+    if (bowUnlocked) {
         boolUnlockDataArray[8] = "t"
     }
-    if (bowUnlocked) {
+    if (netheriteUpgrade) {
         boolUnlockDataArray[9] = "t"
     }
-    boolUnlockData = "" + boolUnlockDataArray[0] + boolUnlockDataArray[1] + boolUnlockDataArray[2] + boolUnlockDataArray[3] + boolUnlockDataArray[4] + boolUnlockDataArray[5] + boolUnlockDataArray[6] + boolUnlockDataArray[7]
+    boolUnlockData = "" + boolUnlockDataArray[0] + boolUnlockDataArray[1] + boolUnlockDataArray[2] + boolUnlockDataArray[3] + boolUnlockDataArray[4] + boolUnlockDataArray[5] + boolUnlockDataArray[6] + boolUnlockDataArray[7] + boolUnlockDataArray[8] + boolUnlockDataArray[9]
     blockSettings.writeString("" + convertToText(saveFile) + "bools", boolUnlockData)
     blockSettings.writeNumberArray("" + convertToText(saveFile) + "armorEquipped", [
     0,
@@ -1120,6 +1212,33 @@ function beamShift (screen2: Image, width: number, height: number) {
         }
     }
 }
+controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
+    if (startsequence && BossHammerUnlocked) {
+        if (!(mapActive)) {
+            chargingLeap = true
+            LeapingCharge = 0
+        }
+    } else {
+        if (!(saveMenu)) {
+            openSaveMenu(true)
+        } else {
+            if (saveSystemTrip) {
+                timer.background(function () {
+                    saveSystemTrip = false
+                    story.clearAllText()
+                    overwriteSave(saveSelection)
+                    story.spriteSayText(saveSelectorSprite, "complete!", 6, 1, story.TextSpeed.VeryFast)
+                })
+            } else {
+                timer.background(function () {
+                    story.clearAllText()
+                    saveSystemTrip = true
+                    story.spriteSayText(saveSelectorSprite, "overwrite file with current data?", 4, 1, story.TextSpeed.VeryFast)
+                })
+            }
+        }
+    }
+})
 function drawEyeBeam (eyeX: number, eyeY: number, beamCoords: Sprite) {
     for (let index = 0; index <= 15; index++) {
         witherStormEyeTrace.drawLine(eyeX - 0, eyeY - 0, beamCoords.x + index * 6, beamCoords.y, 10)
@@ -1547,6 +1666,109 @@ function PotionEffect (Boosted: boolean) {
         xTear.startEffect(effects.bubbles)
     }
 }
+controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
+    if (startsequence) {
+        chargingLeap = false
+        LeapingCharge = 0
+        if (angle < 15) {
+            angle += 15
+        }
+        if (inair == 0 && !(jumpLock) && !(tridentSequenceLockout)) {
+            inair = 1
+            xTear.vy = -115
+            if (DiamondSet == 4) {
+                animation.runImageAnimation(
+                xTear,
+                playerAnimations[3][2],
+                1000,
+                false
+                )
+            } else if (IronSet == 4) {
+                animation.runImageAnimation(
+                xTear,
+                playerAnimations[2][2],
+                1000,
+                false
+                )
+            } else if (GoldSet == 4) {
+                animation.runImageAnimation(
+                xTear,
+                playerAnimations[1][2],
+                1000,
+                false
+                )
+            } else {
+                animation.runImageAnimation(
+                xTear,
+                playerAnimations[0][2],
+                1000,
+                false
+                )
+            }
+            timer.after(500, function () {
+                if (!(aiming)) {
+                    defaultAnimatePlayer()
+                } else {
+                    if (diamondSword) {
+                        animation.runImageAnimation(
+                        xTear,
+                        playerAnimations[3][4],
+                        100,
+                        true
+                        )
+                    } else if (ironSword) {
+                        animation.runImageAnimation(
+                        xTear,
+                        playerAnimations[2][4],
+                        100,
+                        true
+                        )
+                    } else if (GoldSword) {
+                        animation.runImageAnimation(
+                        xTear,
+                        playerAnimations[1][4],
+                        100,
+                        true
+                        )
+                    } else {
+                        animation.runImageAnimation(
+                        xTear,
+                        playerAnimations[0][4],
+                        100,
+                        true
+                        )
+                    }
+                }
+            })
+        }
+    } else if (mapActive) {
+        playLevel(mapSelection)
+    } else if (saveMenu) {
+        if (saveSelection == 6) {
+            openSaveMenu(false)
+        } else if (saveSelection == 5) {
+            blockSettings.clear()
+            timer.background(function () {
+                story.clearAllText()
+                story.spriteSayText(saveSelectorSprite, "Saves erased!", 6, 1)
+            })
+        } else {
+            if (!(blockSettings.readString("" + saveSelection + "name").isEmpty())) {
+                loadSave(saveSelection)
+                openSaveMenu(false)
+            } else {
+                timer.background(function () {
+                    scene.cameraShake(2, 100)
+                    story.clearAllText()
+                    story.spriteSayText(saveSelectorSprite, "no file found", 2, 1)
+                })
+            }
+        }
+    } else {
+        effects.confetti.endScreenEffect()
+        GameIntro()
+    }
+})
 function startStorm () {
     color.startFadeFromCurrent(color.Black, 1000)
     timer.after(1000, function () {
@@ -1998,476 +2220,6 @@ function startStorm () {
         })
     })
 }
-controller.down.onEvent(ControllerButtonEvent.Released, function () {
-    if (startsequence && !(mapActive)) {
-        if (!(tridentSequenceLockout) && (attack == 0 && !(blocking)) && aiming) {
-            arrowCalculatedPower = calcArrowPower(arrowCharge)
-            sprites.destroy(chargeDot)
-            sprites.destroy(playerBow)
-            if (!(arrowCharge < 8)) {
-                playerArrow = sprites.create(img`
-                    . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . f . . . . . . 
-                    . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . 
-                    `, SpriteKind.Projectile)
-                playerArrow.setKind(SpriteKind.playerArrow)
-                playerArrow.lifespan = 2000
-                if (!(fireworkBowUpgrade)) {
-                    if (angle > 87) {
-                        playerArrow.setImage(img`
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . 1 . . . . . . . 
-                            . . . . . . . 1 1 1 . . . . . . 
-                            . . . . . . . 1 e 1 . . . . . . 
-                            . . . . . . . . e . . . . . . . 
-                            . . . . . . . . e . . . . . . . 
-                            . . . . . . . . e . . . . . . . 
-                            . . . . . . . . e . . . . . . . 
-                            . . . . . . . . e . . . . . . . 
-                            . . . . . . . 1 e 1 . . . . . . 
-                            . . . . . . . 1 e 1 . . . . . . 
-                            . . . . . . . 1 . 1 . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            `)
-                    } else if (angle > 81) {
-                        playerArrow.setImage(img`
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . 1 . . . . . . . 
-                            . . . . . . . 1 1 1 . . . . . . 
-                            . . . . . . . 1 e 1 . . . . . . 
-                            . . . . . . . . e . . . . . . . 
-                            . . . . . . . . e . . . . . . . 
-                            . . . . . . . e e . . . . . . . 
-                            . . . . . . . 1 e . . . . . . . 
-                            . . . . . . 1 1 1 . . . . . . . 
-                            . . . . . . 1 1 1 . . . . . . . 
-                            . . . . . . . . 1 . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            `)
-                    } else if (angle > 70) {
-                        playerArrow.setImage(img`
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . 1 . . . . . . 
-                            . . . . . . . . 1 1 . . . . . . 
-                            . . . . . . . . 1 1 . . . . . . 
-                            . . . . . . . . e e . . . . . . 
-                            . . . . . . . . e . . . . . . . 
-                            . . . . . . . . e . . . . . . . 
-                            . . . . . . . 1 e . . . . . . . 
-                            . . . . . . 1 1 1 . . . . . . . 
-                            . . . . . . 1 1 1 . . . . . . . 
-                            . . . . . . . 1 1 . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            `)
-                    } else if (angle > 60) {
-                        playerArrow.setImage(img`
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . 1 . . . . . . 
-                            . . . . . . . . 1 1 . . . . . . 
-                            . . . . . . . . 1 1 . . . . . . 
-                            . . . . . . . . e . . . . . . . 
-                            . . . . . . . . e . . . . . . . 
-                            . . . . . . . e . . . . . . . . 
-                            . . . . . . 1 e . . . . . . . . 
-                            . . . . . 1 1 1 . . . . . . . . 
-                            . . . . . 1 1 1 . . . . . . . . 
-                            . . . . . . 1 1 . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            `)
-                    } else if (angle > 50) {
-                        playerArrow.setImage(img`
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . 1 1 . . . . 
-                            . . . . . . . . . 1 1 . . . . . 
-                            . . . . . . . . 1 e 1 . . . . . 
-                            . . . . . . . . e . . . . . . . 
-                            . . . . . . . e . . . . . . . . 
-                            . . . . . . 1 1 . . . . . . . . 
-                            . . . . . 1 1 1 . . . . . . . . 
-                            . . . . 1 1 1 . . . . . . . . . 
-                            . . . . . 1 . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            `)
-                    } else if (angle > 40) {
-                        playerArrow.setImage(img`
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . 1 1 . . . 
-                            . . . . . . . . . . 1 1 1 . . . 
-                            . . . . . . . . . . e 1 . . . . 
-                            . . . . . . . . . e . . . . . . 
-                            . . . . . . . . e . . . . . . . 
-                            . . . . . . 1 e . . . . . . . . 
-                            . . . . . 1 1 1 . . . . . . . . 
-                            . . . . 1 1 1 . . . . . . . . . 
-                            . . . . . 1 . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            `)
-                    } else if (angle > 34) {
-                        playerArrow.setImage(img`
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . 1 1 . . . 
-                            . . . . . . . . . 1 1 1 1 . . . 
-                            . . . . . . . . . e 1 . . . . . 
-                            . . . . . . . e e . . . . . . . 
-                            . . . . 1 1 e e . . . . . . . . 
-                            . . . 1 1 1 1 . . . . . . . . . 
-                            . . . . 1 1 . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            `)
-                    } else if (angle > 20) {
-                        playerArrow.setImage(img`
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . 1 1 1 . . . 
-                            . . . . . . . . e e 1 1 . . . . 
-                            . . . . 1 1 1 e . . . . . . . . 
-                            . . . 1 e 1 1 . . . . . . . . . 
-                            . . . . 1 1 . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            `)
-                    } else if (angle > 10) {
-                        playerArrow.setImage(img`
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . 1 1 . . . . 
-                            . . . 1 1 1 . e e e 1 1 1 . . . 
-                            . . . 1 1 1 1 e . . . . . . . . 
-                            . . . . 1 1 1 . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            `)
-                    } else {
-                        playerArrow.setImage(img`
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . 1 1 1 . . . . . 1 1 . . . 
-                            . . . . e e e e e e e e 1 1 . . 
-                            . . . 1 1 1 . . . . . 1 1 . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            `)
-                    }
-                } else {
-                    sprites.setDataBoolean(playerArrow, "isFirework", true)
-                    playerArrow.lifespan = 300
-                    if (angle > 87) {
-                        playerArrow.setImage(img`
-                            . . . . . . . . 2 . . . . . . . 
-                            . . . . . . . 2 2 2 . . . . . . 
-                            . . . . . . 2 2 2 2 2 . . . . . 
-                            . . . . . . 2 2 2 2 2 . . . . . 
-                            . . . . . . . 1 1 2 . . . . . . 
-                            . . . . . . . 1 2 2 . . . . . . 
-                            . . . . . . . 2 2 1 . . . . . . 
-                            . . . . . . . 2 1 1 . . . . . . 
-                            . . . . . . . 1 1 2 . . . . . . 
-                            . . . . . . . 1 2 2 . . . . . . 
-                            . . . . . . . 2 2 1 . . . . . . 
-                            . . . . . . . 2 f 1 . . f f . . 
-                            . . . . . . . . f . . f . . . . 
-                            . . . . . . . . . f f . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            `)
-                    } else if (angle > 81) {
-                        playerArrow.setImage(img`
-                            . . . . . . . . 2 2 . . . . . . 
-                            . . . . . . . 2 2 2 2 . . . . . 
-                            . . . . . . 2 2 2 2 2 . . . . . 
-                            . . . . . . 2 2 2 2 2 . . . . . 
-                            . . . . . . . 1 1 2 . . . . . . 
-                            . . . . . . . 1 2 2 . . . . . . 
-                            . . . . . . . 2 2 1 . . . . . . 
-                            . . . . . . 2 1 1 . . . . . . . 
-                            . . . . . . 1 1 2 . . . . . . . 
-                            . . . . . . 1 2 2 . . . . . . . 
-                            . . . . . . 2 2 1 . . . . . . . 
-                            . . . . . . 2 f 1 . . f f . . . 
-                            . . . . . . . f . . f . . . . . 
-                            . . . . . . . . f f . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            `)
-                    } else if (angle > 70) {
-                        playerArrow.setImage(img`
-                            . . . . . . . . 2 2 . . . . . . 
-                            . . . . . . . 2 2 2 . . . . . . 
-                            . . . . . . 2 2 2 2 . . . . . . 
-                            . . . . . . 2 2 2 2 . . . . . . 
-                            . . . . . . . 1 1 2 . . . . . . 
-                            . . . . . . 1 2 2 . . . . . . . 
-                            . . . . . . 2 2 1 . . . . . . . 
-                            . . . . . . 2 1 1 . . . . . . . 
-                            . . . . . . 1 1 2 . . . . . . . 
-                            . . . . . 1 2 2 . . . . . . . . 
-                            . . . . . 2 2 1 . . f . . . . . 
-                            . . . . . 2 f 1 . . f . . . . . 
-                            . . . . . . f . . f . . . . . . 
-                            . . . . . . . f f . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            `)
-                    } else if (angle > 60) {
-                        playerArrow.setImage(img`
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . 2 2 2 . . . . . 
-                            . . . . . . . 2 2 2 2 . . . . . 
-                            . . . . . . 2 2 2 2 2 . . . . . 
-                            . . . . . . 2 2 2 2 . . . . . . 
-                            . . . . . . . 1 1 2 . . . . . . 
-                            . . . . . . 1 2 2 . . . . . . . 
-                            . . . . . . 2 2 1 . . . . . . . 
-                            . . . . . 2 1 1 . . . . . . . . 
-                            . . . . . 1 1 2 . . . . . . . . 
-                            . . . . 1 2 2 . . . . . . . . . 
-                            . . . . 2 2 1 . . f . . . . . . 
-                            . . . . 2 f 1 . . f . . . . . . 
-                            . . . . . f . . f . . . . . . . 
-                            . . . . . . f f . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            `)
-                    } else if (angle > 50) {
-                        playerArrow.setImage(img`
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . 2 2 2 2 . 
-                            . . . . . . . . . . 2 2 2 2 2 . 
-                            . . . . . . . . . . 1 2 2 2 2 . 
-                            . . . . . . . . . 1 1 1 2 2 2 . 
-                            . . . . . . . . 2 2 2 1 1 2 . . 
-                            . . . . . . . 1 1 2 2 2 . . . . 
-                            . . . . . . 1 1 1 1 1 . . . . . 
-                            . . . . . . 2 2 1 1 . . . . . . 
-                            . . . . . f f 2 2 . . . . . . . 
-                            . . . . f . . . . . . . . . . . 
-                            . . . . f . . f . . . . . . . . 
-                            . . . . . f f . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            `)
-                    } else if (angle > 40) {
-                        playerArrow.setImage(img`
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . 2 2 2 2 . 
-                            . . . . . . . . . . 2 2 2 2 2 . 
-                            . . . . . . . . . . 1 2 2 2 2 . 
-                            . . . . . . . . . 1 1 1 2 2 2 . 
-                            . . . . . . . . 2 2 2 1 1 2 . . 
-                            . . . . . . . 1 1 2 2 2 . . . . 
-                            . . . . . . 1 1 1 1 1 . . . . . 
-                            . . . . . . 2 2 1 1 . . . . . . 
-                            . . . . . f f 2 2 . . . . . . . 
-                            . . . . f . . . . . . . . . . . 
-                            . . . . f . . f . . . . . . . . 
-                            . . . . . f f . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            `)
-                    } else if (angle > 34) {
-                        playerArrow.setImage(img`
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . 2 2 2 2 . 
-                            . . . . . . . . . . 2 2 2 2 2 . 
-                            . . . . . . . . . . 1 2 2 2 2 . 
-                            . . . . . . . . . 1 1 1 2 2 2 . 
-                            . . . . . . . . 2 2 2 1 1 2 . . 
-                            . . . . . . . 1 1 2 2 2 . . . . 
-                            . . . . . . 1 1 1 1 1 . . . . . 
-                            . . . . . . 2 2 1 1 . . . . . . 
-                            . . . . . f f 2 2 . . . . . . . 
-                            . . . . f . . . . . . . . . . . 
-                            . . . . f . . f . . . . . . . . 
-                            . . . . . f f . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            `)
-                    } else if (angle > 20) {
-                        playerArrow.setImage(img`
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . 2 2 2 2 . 
-                            . . . . . . . . . 2 2 2 2 2 2 . 
-                            . . f f . . . . 1 2 2 2 2 2 . . 
-                            . f . . f . 2 1 2 2 1 2 2 2 . . 
-                            . f . 1 1 2 1 1 2 1 . 2 . . . . 
-                            . . f f 2 2 1 2 . . . . . . . . 
-                            . . . 2 2 1 . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            `)
-                    } else if (angle > 10) {
-                        playerArrow.setImage(img`
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . f . . . . . . . . . . . 
-                            . . . f . . . . . . . . 2 2 2 . 
-                            . . f . . . . . . 1 2 2 2 2 2 2 
-                            . . f . 1 1 2 2 1 2 2 1 2 2 2 2 
-                            . . . f f 2 2 1 1 2 1 1 2 2 2 . 
-                            . . . . 2 2 1 1 2 . . . 2 2 . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            `)
-                    } else {
-                        playerArrow.setImage(img`
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . f . . . . . . . . . . 
-                            . . . f f . . . . . . . . . . . 
-                            . . f . . . . . . . . . 2 2 . . 
-                            . . f . 1 1 2 2 1 1 2 2 2 2 2 . 
-                            . . . f f 2 2 1 1 2 2 1 2 2 2 2 
-                            . . . . 2 2 1 1 2 2 1 1 2 2 2 . 
-                            . . . . . . . . . . . . 2 2 . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            `)
-                    }
-                }
-                angle = 0
-                playerArrow.startEffect(effects.spray, 300)
-                playerArrow.setPosition(xTear.x, xTear.y)
-                playerArrowDX = endX - xTear.x
-                playerArrowDY = endY - xTear.y
-                playerArrowDistance = Math.sqrt(playerArrowDX * playerArrowDX + playerArrowDY * playerArrowDY)
-                playerArrow.vx = playerArrowDX / (playerArrowDistance * arrowCalculatedPower)
-                playerArrow.vy = playerArrowDY / (playerArrowDistance * arrowCalculatedPower)
-                music.setVolume(255)
-                if (arrowCharge >= 8) {
-                    music.play(music.createSoundEffect(WaveShape.Sawtooth, 419, 241, 255, 0, 200, SoundExpressionEffect.Warble, InterpolationCurve.Linear), music.PlaybackMode.InBackground)
-                }
-                if (arrowCharge > 14) {
-                    music.play(music.createSoundEffect(WaveShape.Sawtooth, 983, 983, 255, 0, 200, SoundExpressionEffect.Warble, InterpolationCurve.Linear), music.PlaybackMode.InBackground)
-                }
-                if (arrowCharge >= 20) {
-                    music.play(music.createSoundEffect(WaveShape.Sawtooth, 1250, 1191, 255, 0, 150, SoundExpressionEffect.Warble, InterpolationCurve.Linear), music.PlaybackMode.InBackground)
-                }
-                arrowGravity = true
-            }
-            if (DiamondSet == 4) {
-                animation.runImageAnimation(
-                xTear,
-                playerAnimations[3][1],
-                175,
-                true
-                )
-            } else if (IronSet == 4) {
-                animation.runImageAnimation(
-                xTear,
-                playerAnimations[2][1],
-                175,
-                true
-                )
-            } else if (GoldSet == 4) {
-                animation.runImageAnimation(
-                xTear,
-                playerAnimations[1][1],
-                175,
-                true
-                )
-            } else {
-                animation.runImageAnimation(
-                xTear,
-                playerAnimations[0][1],
-                175,
-                true
-                )
-            }
-            angle = 0
-        }
-        timer.after(100, function () {
-            aiming = false
-        })
-    }
-})
 sprites.onDestroyed(SpriteKind.TNT, function (sprite) {
     scene.cameraShake(5, 150)
     Detonate(sprite.x, sprite.y + 6, 3)
@@ -4501,10 +4253,25 @@ function mobRunArmoredBlaze (Blaze: Sprite) {
     })
 }
 controller.left.onEvent(ControllerButtonEvent.Pressed, function () {
-    if (mapActive) {
-        if (!(mapSelection <= 1)) {
-            mapSelection += -1
-            map()
+    if (startsequence) {
+    	
+    } else {
+        if (mapActive) {
+            if (!(mapSelection <= 1)) {
+                mapSelection += -1
+                map()
+            }
+        }
+        if (saveMenu) {
+            if (saveSelection > 1) {
+                saveSelection += -1
+                saveSelectorSprite.x += -21
+                readSave()
+            } else {
+                saveSelection = 4
+                saveSelectorSprite.setPosition(152, 198)
+                readSave()
+            }
         }
     }
 })
@@ -5902,6 +5669,15 @@ function flyingMachineDropsTNT (machineSprite: Sprite) {
 function loadSave (saveFile: number) {
     info.setScore(blockSettings.readNumberArray(convertToText(saveFile))[0])
     levelUnlocked = blockSettings.readNumberArray(convertToText(saveFile))[1]
+    DiamondSet = blockSettings.readNumberArray(convertToText(saveFile))[2]
+    IronSet = blockSettings.readNumberArray(convertToText(saveFile))[3]
+    GoldSet = blockSettings.readNumberArray(convertToText(saveFile))[4]
+    NetheriteIngots = blockSettings.readNumberArray(convertToText(saveFile))[5]
+    commandBlocksAvailable = blockSettings.readNumberArray(convertToText(saveFile))[6]
+    WitherSkulls = blockSettings.readNumberArray(convertToText(saveFile))[7]
+    EyesCollected = blockSettings.readNumberArray(convertToText(saveFile))[8]
+    health = blockSettings.readNumberArray(convertToText(saveFile))[9]
+    saturation = blockSettings.readNumberArray(convertToText(saveFile))[10]
     specialLootSprites = [
     [],
     [],
@@ -5909,8 +5685,57 @@ function loadSave (saveFile: number) {
     [],
     []
     ]
-    updateArmorSystem()
-    updateSaturationHealthDisplay()
+    boolUnlockStringRead = blockSettings.readString("" + convertToText(saveFile) + "bools")
+    if (boolUnlockStringRead.substr(0, 1) == "t") {
+        BossHammerUnlocked = true
+    } else {
+        BossHammerUnlocked = false
+    }
+    if (boolUnlockStringRead.substr(1, 1) == "t") {
+        bossSwordUnlocked = true
+    } else {
+        bossSwordUnlocked = false
+    }
+    if (boolUnlockStringRead.substr(2, 1) == "t") {
+        DoubleHealth = true
+    } else {
+        DoubleHealth = false
+    }
+    if (boolUnlockStringRead.substr(3, 1) == "t") {
+        BedrockShield = true
+    } else {
+        BedrockShield = false
+    }
+    if (boolUnlockStringRead.substr(4, 1) == "t") {
+        totemOfUndying = true
+    } else {
+        totemOfUndying = false
+    }
+    if (boolUnlockStringRead.substr(5, 1) == "t") {
+    	
+    } else {
+    	
+    }
+    if (boolUnlockStringRead.substr(6, 1) == "t") {
+        TridentUnlocked = true
+    } else {
+        TridentUnlocked = false
+    }
+    if (boolUnlockStringRead.substr(7, 1) == "t") {
+        fireworkBowUpgrade = true
+    } else {
+        fireworkBowUpgrade = false
+    }
+    if (boolUnlockStringRead.substr(8, 1) == "t") {
+        bowUnlocked = true
+    } else {
+        bowUnlocked = false
+    }
+    if (boolUnlockStringRead.substr(9, 1) == "t") {
+        netheriteUpgrade = true
+    } else {
+        netheriteUpgrade = false
+    }
     if (!(BossHammerUnlocked) && !(bossSwordUnlocked)) {
         specialLootSprites[0][0] = img`
             fffffffffffffffffffffffffffffffffffffffffffffffff
@@ -6051,7 +5876,7 @@ function loadSave (saveFile: number) {
             fffffffffffffffffffffffffffffffffffffffffffffffff
             `
     } else {
-        if (commandblocksAvailable == 3 || commandblocksAvailable == 0) {
+        if (commandBlocksAvailable == 3 || commandBlocksAvailable == 0) {
             specialLootSprites[0][0] = img`
                 d 
                 `
@@ -6062,7 +5887,7 @@ function loadSave (saveFile: number) {
                 6 
                 `
         }
-        if (commandblocksAvailable == 2) {
+        if (commandBlocksAvailable == 2) {
             specialLootSprites[0][0] = img`
                 d 
                 `
@@ -6070,7 +5895,7 @@ function loadSave (saveFile: number) {
                 a 
                 `
         }
-        if (commandblocksAvailable == 1) {
+        if (commandBlocksAvailable == 1) {
             specialLootSprites[0][0] = img`
                 d 
                 `
@@ -6710,15 +6535,12 @@ function loadSave (saveFile: number) {
         fcccccccccccccccccccccccccccccccccccccccccccccccf
         fffffffffffffffffffffffffffffffffffffffffffffffff
         `
+    effects.confetti.endScreenEffect()
+    skipIntro = true
+    GameIntro()
+    updateArmorSystem()
+    updateSaturationHealthDisplay()
 }
-controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
-    if (startsequence && BossHammerUnlocked) {
-        if (!(mapActive)) {
-            chargingLeap = true
-            LeapingCharge = 0
-        }
-    }
-})
 controller.B.onEvent(ControllerButtonEvent.Repeated, function () {
     if (startsequence && (BossHammerUnlocked && !(mapActive))) {
         if (!(tridentSequenceLockout) && (inair == 0 && canLeapingAttack && chargingLeap && (!(blocking) && !(aiming) && attack == 0))) {
@@ -6887,44 +6709,6 @@ function MobShootsArrow (MobShootingArrow: Sprite) {
         }
     }
 }
-controller.up.onEvent(ControllerButtonEvent.Pressed, function () {
-    if (startsequence && !(mapActive)) {
-        upButtonPressed = true
-        if (TridentUnlocked && (!(TridentAttack) && (inair == 0 && canLeapingAttack && (!(blocking) && !(aiming) && attack == 0)))) {
-            holdingTrident = true
-            attack = 1
-            if (DiamondSet == 4) {
-                animation.runImageAnimation(
-                xTear,
-                playerAnimations[3][11],
-                100,
-                true
-                )
-            } else if (IronSet == 4) {
-                animation.runImageAnimation(
-                xTear,
-                playerAnimations[2][11],
-                100,
-                true
-                )
-            } else if (GoldSet == 4) {
-                animation.runImageAnimation(
-                xTear,
-                playerAnimations[1][11],
-                100,
-                true
-                )
-            } else {
-                animation.runImageAnimation(
-                xTear,
-                playerAnimations[0][11],
-                100,
-                true
-                )
-            }
-        }
-    }
-})
 sprites.onOverlap(SpriteKind.playerArrow, SpriteKind.mob, function (sprite, otherSprite) {
     if (startsequence) {
         if (!(fireworkBowUpgrade)) {
@@ -9313,7 +9097,7 @@ function specialLootRoll (Red: boolean) {
                                     f22222222222222222222222222222222222222222222222f
                                     fffffffffffffffffffffffffffffffffffffffffffffffff
                                     `
-                                commandblocksAvailable = 3
+                                commandBlocksAvailable = 3
                             }
                             if (specialLootSprites[1].length == 0) {
                                 specialLootSprites[1][0] = img`
@@ -9706,7 +9490,7 @@ function specialLootRoll (Red: boolean) {
                                     `
                             }
                             if (Red) {
-                                if (commandblocksAvailable == 0) {
+                                if (commandBlocksAvailable == 0) {
                                     lootReward(specialLootSprites[0].removeAt(randint(0, specialLootSprites[0].length - 1)))
                                 } else {
                                     lootReward(specialLootSprites[0].removeAt(specialLootSprites[0].length - 1))
@@ -9825,92 +9609,6 @@ function mobRunSkeleton (Skeleton: Sprite) {
         })
     })
 }
-controller.right.onEvent(ControllerButtonEvent.Pressed, function () {
-    if (startsequence) {
-        if (mapActive) {
-            if (mapSelection < levelUnlocked) {
-                mapSelection += 1
-                map()
-            }
-        } else {
-            if (!(tridentSequenceLockout) && (!(aiming) && !(blocking))) {
-                if (attack == 0) {
-                    attack = 1
-                    if (diamondSword) {
-                        animation.runImageAnimation(
-                        xTear,
-                        playerAnimations[3][3],
-                        50,
-                        false
-                        )
-                        xTear.startEffect(effects.halo, 200)
-                        xTear.startEffect(effects.spray, 100)
-                    } else if (ironSword) {
-                        animation.runImageAnimation(
-                        xTear,
-                        playerAnimations[2][3],
-                        50,
-                        false
-                        )
-                        xTear.startEffect(effects.halo, 200)
-                    } else if (GoldSword) {
-                        animation.runImageAnimation(
-                        xTear,
-                        playerAnimations[1][3],
-                        50,
-                        false
-                        )
-                        xTear.startEffect(effects.halo, 200)
-                    } else {
-                        animation.runImageAnimation(
-                        xTear,
-                        playerAnimations[0][3],
-                        50,
-                        false
-                        )
-                        xTear.startEffect(effects.halo, 200)
-                    }
-                    music.setVolume(255)
-                    music.play(music.createSoundEffect(WaveShape.Sawtooth, 4782, 1, 255, 0, 75, SoundExpressionEffect.Vibrato, InterpolationCurve.Logarithmic), music.PlaybackMode.InBackground)
-                    timer.after(150, function () {
-                        if (diamondSword) {
-                            animation.runImageAnimation(
-                            xTear,
-                            playerAnimations[3][1],
-                            175,
-                            true
-                            )
-                        } else if (ironSword) {
-                            animation.runImageAnimation(
-                            xTear,
-                            playerAnimations[2][1],
-                            175,
-                            true
-                            )
-                        } else if (GoldSword) {
-                            animation.runImageAnimation(
-                            xTear,
-                            playerAnimations[1][1],
-                            175,
-                            true
-                            )
-                        } else {
-                            animation.runImageAnimation(
-                            xTear,
-                            playerAnimations[0][1],
-                            175,
-                            true
-                            )
-                        }
-                        timer.after(150, function () {
-                            attack = 0
-                        })
-                    })
-                }
-            }
-        }
-    }
-})
 function beamDebris (beam: Sprite) {
     debris = sprites.create(debrisArray._pickRandom(), SpriteKind.debris)
     debris.setVelocity(100, -100)
@@ -10421,21 +10119,21 @@ function map () {
         ...........eeeeeeddddddfffd1eeeedddddeeeeee11111ddddddddddddddddddddddddddaaaaaaaaaaaaaaaaaaaadddddddddddddddddddddddddaacfaaafaaccccca888fcffafddddeee.........
         ...........eeeeeeddddddfafd1edddedddedddeee11dddddddddddddddddddddddddddddddddaaabbbbbbaaddddddddddddddddddddddddddddddcccccccfccffffa8118ccccafddddeee.........
         ...........eeeeedddddddfffd1edeeeeeeeeedeee11dddddddddddddddddddddddddddddddddddaaaaaaaadddddddddddddddddddddddddddddddcffcffafaccaaa81798fffaafdddddeee........
-        ...........eeeeeddddddddddd1ede1111111edeee11ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddaaccccafbbbab81798baddddddddddeee........
-        ..........eeeeeeddddddddddd1dee1613191eedee11ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddccfffaa88bbb81798bbdddddddddddeee........
-        ..........eeeeeddddddddfffd1dde1111111eddee11ddddddddddddeeeeeeeedddddddddddddddddeeeeeeeeeeeedddddeeeeeddddddddddddddddddabab818b81798bbbbddeeddddddee.........
-        ..........eeeeeddddddddfafd1dde1414151eddee11dddddddddeeeeeeeeeeeeddddddddddddddddeeeeeeeeeeeedddddeeeeeeeeddddddddddddeedbbbbb8181798bbbbbdeeeedddddee.........
-        ..........eeeeeddddddddfffd1dde1111111eddee11dddddddeeeeeeeeeeeeeeddddddddddddddeeeeeeeeeeeeeedddddeeeeeeeeeeddddddddddeeddbbbb817898bbbbbddeeeeeeeeeee.........
-        ..........eeeeeeeeddddddddd1dee1213121eedee1dddddddeeeeee.....eeeeddddddddeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeedddddeeedbbbbb8178bbbbbdddeeeeeeeeeee.........
-        ..........eeeeeeeeedddddddd1ede1111111edeee1dddeeeeeeeeee.....eeeeeeeeeeeeeeeeeeeee.....eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeedbbbb8e8998bbbdddee.eeeeeeeee.........
-        ..........eeeeeeeeeedddfffd1edeeeeeeeeedeee1ddeeeeeeeeeee.....eeeeeeeeeeeeeeeeee.............eeeeeeeee.....eeeeeeeeeeeeeeedddb8e8b8898bbbddde..eeeeeeee.........
-        ..........eee...eeeeeddfafd1edddedddedddeee11ddeeeeeeee..............eeeeeeeeeee.............eeeeeeeee..............eeeeeeed8888bbbb88bbbddee.....eeeee.........
-        ....................eddfffd1eeeedddddeeeeee1ddee.........................................................................edd818bbbdbbbbbdddee...................
-        ....................edddddd11111111111111111ddee.........................................................................eed888ddddddddddddee...................
-        ....................edddddddddddddddddddddddddde.........................................................................eedddddeddddeeeeddee...................
-        ....................eeeddddeddddddddddedddddeee...........................................................................eeeeeeeeeeeeeeeeee....................
-        .....................eeeeeeeeeeeeeeeeeeeeeeeee..................................................................................................................
-        ................................................................................................................................................................
+        ...........eeeeeddddddddddd1ede1111111edeee11ddddddddddddddddddddddddddddeeeeeeddddddddddddddddddddddddddddddddddddddddaaccccafbbbab81798baddddddddddeee........
+        ..........eeeeeeddddddddddd1dee1613191eedee11dddddddddddddddddddddddeeeeeeeeeeeeeddddddeeeeddddddddddddddddddddddddddddccfffaa88bbb81798bbdddddddddddeee........
+        ..........eeeeeddddddddfffd1dde1111111eddee11ddddddddddddeeeeeeeedddeeeeeeeeeeeeeeedddeeeeeeeeedddddddddddddddddddddddddddabab818b81798bbbbddeeddddddee.........
+        ..........eeeeeddddddddfafd1dde1414151eddee11dddddddddeeeeeeeeeeeeeeeecccbbbccbceeeeeee9999999eeeedddddddddddddddddddddeedbbbbb8181798bbbbbdeeeedddddee.........
+        ..........eeeeeddddddddfffd1dde1111111eddee11dddddddeeeeeeeeeeeeeeeeeecccbbbccbcceeeee988888889eeeeeeeeeeeeeeddddddddddeeddbbbb817898bbbbbddeeeeeeeeeee.........
+        ..........eeeeeeeeddddddddd1dee1213121eedee1dddddddeeeeeeeeeeeeeeeeeeecccbbbbbbccceee98899998889eeeeeeeeeeeeeeeeeedddddeeedbbbbb8178bbbbbdddeeeeeeeeeee.........
+        ..........eeeeeeeeedddddddd1ede1111111edeee1dddeeeeeeeeee..eeeeeeeeeeecccccccccccccee98898889889eeeeeeeeeeeeeeeeeeeeeeeeeedbbbb8e8998bbbdddee.eeeeeeeee.........
+        ..........eeeeeeeeeedddfffd1edeeeeeeeeedeee1ddeeeeeeeeeee.....eeeeeeeecccccccccccccee98899998889eeeeeeeeeeeeeeeeeeeeeeeeeedddb8e8b8898bbbddde..eeeeeeee.........
+        ..........eee...eeeeeddfafd1edddedddedddeee11ddeeeeeeee.........e.eeeeccbbbbbbbbbccee98898889889eeeeeeeeeee.........eeeeeeed8888bbbb88bbbddee.....eeeee.........
+        ....................eddfffd1eeeedddddeeeeee1ddee..................eeeeccbcccccccbccee98898889889eeeeeeeee................edd818bbbdbbbbbdddee...................
+        ....................edddddd11111111111111111ddee...................eeeccbbbbbbbbbccee98899998889eeeeeee..................eed888ddddddddddddee...................
+        ....................edddddddddddddddddddddddddde...................eeeccbcccccccbcceee988888889eeeeeee...................eedddddeddddeeeeddee...................
+        ....................eeeddddeddddddddddedddddeee....................eeeccbbbbbbbbbcceeee9999999eeeeeee.....................eeeeeeeeeeeeeeeeee....................
+        .....................eeeeeeeeeeeeeeeeeeeeeeeee......................eeeeeeeeeeeeeeeeeeeeeeeeeeeeee..............................................................
+        ....................................................................ee................eeee...e..................................................................
         ................................................................................................................................................................
         ................................................................................................................................................................
         ................................................................................................................................................................
@@ -10447,6 +10145,7 @@ function map () {
         `
     levelMapSprite = sprites.create(levelMap, SpriteKind.noInteract)
     mapActive = true
+    startsequence = false
     if (levelUnlocked >= 1) {
         for (let mapX = 0; mapX <= 6; mapX++) {
             for (let mapY = 0; mapY <= 6; mapY++) {
@@ -26063,35 +25762,7 @@ controller.down.onEvent(ControllerButtonEvent.Pressed, function () {
                 false
                 )
             }
-            if (diamondSword == true) {
-                animation.runImageAnimation(
-                xTear,
-                playerAnimations[3][4],
-                100,
-                true
-                )
-            } else if (ironSword == true) {
-                animation.runImageAnimation(
-                xTear,
-                playerAnimations[2][4],
-                100,
-                true
-                )
-            } else if (GoldSword == true) {
-                animation.runImageAnimation(
-                xTear,
-                playerAnimations[1][4],
-                100,
-                true
-                )
-            } else {
-                animation.runImageAnimation(
-                xTear,
-                playerAnimations[0][4],
-                100,
-                true
-                )
-            }
+            defaultAnimatePlayer()
             playerBow.z = 10
             playerBow.setPosition(xTear.x + 4, xTear.y)
             chargeDot.setPosition(xTear.x, xTear.y)
@@ -26103,6 +25774,21 @@ controller.down.onEvent(ControllerButtonEvent.Pressed, function () {
             endX = xTear.x + radius * Math.cos(angle * 3.1415927 / 180)
             endY = xTear.y - radius * Math.sin(angle * 3.1415927 / 180)
             chargeDot.setPosition(endX, endY)
+        }
+    } else {
+        if (saveMenu) {
+            if (saveSelection == 6) {
+                saveSelection = 1
+                readSave()
+                saveSelectorSprite.setPosition(89, 198)
+            } else {
+                saveSelection = 5
+                saveSelectorSprite.setPosition(89, 219)
+                timer.background(function () {
+                    story.clearAllText()
+                    story.spriteSayText(saveSelectorSprite, "Clear ALL save data?", 1, 2, story.TextSpeed.VeryFast)
+                })
+            }
         }
     }
 })
@@ -26881,6 +26567,75 @@ function OverworldBackgroundSequence () {
         placeInnerTop(lastCreatedTopInner.right)
     }
 }
+controller.right.onEvent(ControllerButtonEvent.Pressed, function () {
+    if (startsequence) {
+        if (!(tridentSequenceLockout) && (!(aiming) && !(blocking))) {
+            if (attack == 0) {
+                attack = 1
+                if (diamondSword) {
+                    animation.runImageAnimation(
+                    xTear,
+                    playerAnimations[3][3],
+                    50,
+                    false
+                    )
+                    xTear.startEffect(effects.halo, 200)
+                    xTear.startEffect(effects.spray, 100)
+                } else if (ironSword) {
+                    animation.runImageAnimation(
+                    xTear,
+                    playerAnimations[2][3],
+                    50,
+                    false
+                    )
+                    xTear.startEffect(effects.halo, 200)
+                } else if (GoldSword) {
+                    animation.runImageAnimation(
+                    xTear,
+                    playerAnimations[1][3],
+                    50,
+                    false
+                    )
+                    xTear.startEffect(effects.halo, 200)
+                } else {
+                    animation.runImageAnimation(
+                    xTear,
+                    playerAnimations[0][3],
+                    50,
+                    false
+                    )
+                    xTear.startEffect(effects.halo, 200)
+                }
+                music.setVolume(255)
+                music.play(music.createSoundEffect(WaveShape.Sawtooth, 4782, 1, 255, 0, 75, SoundExpressionEffect.Vibrato, InterpolationCurve.Logarithmic), music.PlaybackMode.InBackground)
+                timer.after(150, function () {
+                    defaultAnimatePlayer()
+                    timer.after(150, function () {
+                        attack = 0
+                    })
+                })
+            }
+        }
+    } else {
+        if (mapActive) {
+            if (mapSelection < levelUnlocked) {
+                mapSelection += 1
+                map()
+            }
+        }
+        if (saveMenu) {
+            if (saveSelection < 4) {
+                saveSelection += 1
+                saveSelectorSprite.x += 21
+                readSave()
+            } else {
+                saveSelection = 1
+                saveSelectorSprite.setPosition(89, 198)
+                readSave()
+            }
+        }
+    }
+})
 function splashLevelStats (mobsKilled: number, experienceGained: number, foundArmor: number) {
     StatBlockSprite = sprites.createProjectileFromSide(img`
         ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
@@ -27072,6 +26827,55 @@ function splashLevelStats (mobsKilled: number, experienceGained: number, foundAr
             })
         })
     })
+}
+function readSave () {
+    if (!(saveSelection == 6)) {
+        saveSelectorSprite.setImage(img`
+            .55555555555555555.
+            55...............55
+            5.................5
+            5.................5
+            5.................5
+            5.................5
+            5.................5
+            5.................5
+            5.................5
+            5.................5
+            5.................5
+            5.................5
+            5.................5
+            5.................5
+            5.................5
+            5.................5
+            5.................5
+            5.................5
+            55...............55
+            .55555555555555555.
+            `)
+        if (blockSettings.readString("" + saveSelection + "name").isEmpty()) {
+            timer.background(function () {
+                story.clearAllText()
+                story.spriteSayText(saveSelectorSprite, "null", 2, 1)
+            })
+        } else {
+            timer.background(function () {
+                story.clearAllText()
+                story.spriteSayText(saveSelectorSprite, blockSettings.readString("" + saveSelection + "name"), 6, 1)
+            })
+        }
+    } else {
+        saveSelectorSprite.setImage(img`
+            . 5 5 5 5 5 5 5 . 
+            5 . . . . . . . 5 
+            5 . . . . . . . 5 
+            5 . . . . . . . 5 
+            5 . . . . . . . 5 
+            5 . . . . . . . 5 
+            5 . . . . . . . 5 
+            5 . . . . . . . 5 
+            . 5 5 5 5 5 5 5 . 
+            `)
+    }
 }
 sprites.onOverlap(SpriteKind.playerArrow, SpriteKind.Fireball, function (sprite, otherSprite) {
     if (sprites.readDataNumber(otherSprite, "FireballPower") >= 3 && !(sprites.readDataBoolean(otherSprite, "ReturningFireball"))) {
@@ -27538,115 +27342,6 @@ function waveAttack () {
     TridentWaveEffect.startEffect(effects.blizzard, 500)
     TridentWaveEffect.startEffect(effects.ashes, 500)
 }
-controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
-    if (startsequence) {
-        if (mapActive) {
-            playLevel(mapSelection)
-        } else {
-            chargingLeap = false
-            LeapingCharge = 0
-            if (angle < 15) {
-                angle += 15
-            }
-            if (inair == 0 && !(jumpLock) && !(tridentSequenceLockout)) {
-                inair = 1
-                xTear.vy = -115
-                if (DiamondSet == 4) {
-                    animation.runImageAnimation(
-                    xTear,
-                    playerAnimations[3][2],
-                    1000,
-                    false
-                    )
-                } else if (IronSet == 4) {
-                    animation.runImageAnimation(
-                    xTear,
-                    playerAnimations[2][2],
-                    1000,
-                    false
-                    )
-                } else if (GoldSet == 4) {
-                    animation.runImageAnimation(
-                    xTear,
-                    playerAnimations[1][2],
-                    1000,
-                    false
-                    )
-                } else {
-                    animation.runImageAnimation(
-                    xTear,
-                    playerAnimations[0][2],
-                    1000,
-                    false
-                    )
-                }
-                timer.after(500, function () {
-                    if (!(aiming)) {
-                        if (diamondSword) {
-                            animation.runImageAnimation(
-                            xTear,
-                            playerAnimations[3][1],
-                            175,
-                            true
-                            )
-                        } else if (ironSword) {
-                            animation.runImageAnimation(
-                            xTear,
-                            playerAnimations[2][1],
-                            175,
-                            true
-                            )
-                        } else if (GoldSword) {
-                            animation.runImageAnimation(
-                            xTear,
-                            playerAnimations[1][1],
-                            175,
-                            true
-                            )
-                        } else {
-                            animation.runImageAnimation(
-                            xTear,
-                            playerAnimations[0][1],
-                            175,
-                            true
-                            )
-                        }
-                    } else {
-                        if (diamondSword) {
-                            animation.runImageAnimation(
-                            xTear,
-                            playerAnimations[3][4],
-                            100,
-                            true
-                            )
-                        } else if (ironSword) {
-                            animation.runImageAnimation(
-                            xTear,
-                            playerAnimations[2][4],
-                            100,
-                            true
-                            )
-                        } else if (GoldSword) {
-                            animation.runImageAnimation(
-                            xTear,
-                            playerAnimations[1][4],
-                            100,
-                            true
-                            )
-                        } else {
-                            animation.runImageAnimation(
-                            xTear,
-                            playerAnimations[0][4],
-                            100,
-                            true
-                            )
-                        }
-                    }
-                })
-            }
-        }
-    }
-})
 spriteutils.createRenderable(100000, function (screen2) {
     if (showWitherBeam) {
         beamShift(screen2, witherStormEyeTrace.width, witherStormEyeTrace.height)
@@ -28371,37 +28066,9 @@ controller.up.onEvent(ControllerButtonEvent.Released, function () {
                                         waveAttack()
                                         timer.after(250, function () {
                                             xTear.setFlag(SpriteFlag.Invisible, true)
-                                            if (diamondSword) {
-                                                animation.runImageAnimation(
-                                                xTear,
-                                                playerAnimations[3][1],
-                                                175,
-                                                true
-                                                )
-                                            } else if (ironSword) {
-                                                animation.runImageAnimation(
-                                                xTear,
-                                                playerAnimations[2][1],
-                                                175,
-                                                true
-                                                )
-                                            } else if (GoldSword) {
-                                                animation.runImageAnimation(
-                                                xTear,
-                                                playerAnimations[1][1],
-                                                175,
-                                                true
-                                                )
-                                            } else {
-                                                animation.runImageAnimation(
-                                                xTear,
-                                                playerAnimations[0][1],
-                                                175,
-                                                true
-                                                )
-                                            }
                                             timer.after(20, function () {
                                                 xTear.setFlag(SpriteFlag.Invisible, false)
+                                                defaultAnimatePlayer()
                                                 invincibilityFrame = false
                                                 attack = 0
                                                 timer.after(100, function () {
@@ -28447,16 +28114,16 @@ function waitForPlay () {
         .............................................................
         .............................................................
         .............................................................
-        .............................................................
-        .............................................................
-        .............................................................
-        .............................................................
-        .............................................................
-        .............................................................
-        .............................................................
-        .............................................................
-        .............................................................
-        .............................................................
+        cccbbbccbc.......9999999.....................................
+        cccbbbccbcc.....988888889....................................
+        cccbbbbbbccc...98899998889...................................
+        ccccccccccccc..98898889889...................................
+        ccccccccccccc..98899998889...................................
+        ccbbbbbbbbbcc..98898889889...................................
+        ccbcccccccbcc..98898889889...................................
+        ccbbbbbbbbbcc..98899998889...................................
+        ccbcccccccbcc...988888889....................................
+        ccbbbbbbbbbcc....9999999.....................................
         `)
     Logo = sprites.create(img`
         ........................................................................................................................
@@ -28871,81 +28538,6 @@ function waitForPlay () {
     3000,
     true
     )
-    pauseUntil(() => controller.A.isPressed() || controller.B.isPressed())
-    if (controller.A.isPressed()) {
-        effects.confetti.endScreenEffect()
-        GameIntro()
-    } else {
-        saveSelection = 1
-        saveSprite = sprites.create(img`
-            .cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc.
-            ccaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaacc
-            caabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbaac
-            cabbffffffffffffffffffffffffffffffffffffffffbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbac
-            cabffffffffffffffffffffffffffffffffffffffffffbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbac
-            cabff6fff666f666f66fffff666f666f6f6f666ff666fbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbac
-            cabff6fff6f6f6f6f6f6ffff6fff6f6f6f6f6ffffff6fbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbac
-            cabff6fff6f6f6f6f6f6ffff666f6f6f6f6f666fff66fbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbac
-            cabff6fff6f6f666f6f6ffffff6f666f6f6f6ffffffffbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbac
-            cabff666f666f6f6f66fffff666f6f6ff6ff666fff6ffbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbac
-            cabffffffffffffffffffffffffffffffffffffffffffbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbac
-            cabbffffffffffffffffffffffffffffffffffffffffbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbac
-            cabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbac
-            cabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbac
-            cabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbac
-            cabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbac
-            cabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbac
-            cabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbac
-            cabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbac
-            cabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbac
-            cabbbbbbcccccccccccccccccbbbbcccccccccccccccccbbbbcccccccccccccccccbbbbcccccccccccccccccbbbbbbac
-            cabbbbbcccccccccccccccccccbbcccccccccccccccccccbbcccccccccccccccccccbbcccccccccccccccccccbbbbbac
-            cabbbbbcccccccccccccccccccbbcccccccccccccccccccbbcccccccccccccccccccbbcccccccccccccccccccbbbbbac
-            cabbbbbcccccccccccccccccccbbcccccccccccccccccccbbcccccccccccccccccccbbcccccccccccccccccccbbbbbac
-            cabbbbbcccccccccccccccccccbbcccccccccccccccccccbbcccccccccccccccccccbbcccccccccccccccccccbbbbbac
-            cabbbbbcccccccccccccccccccbbcccccccccccccccccccbbcccccccccccccccccccbbcccccccccccccccccccbbbbbac
-            cabbbbbcccccccccccccccccccbbcccccccccccccccccccbbcccccccccccccccccccbbcccccccccccccccccccbbbbbac
-            cabbbbbcccccccccccccccccccbbcccccccccccccccccccbbcccccccccccccccccccbbcccccccccccccccccccbbbbbac
-            cabbbbbcccccccccccccccccccbbcccccccccccccccccccbbcccccccccccccccccccbbcccccccccccccccccccbbbbbac
-            cabbbbbcccccccccccccccccccbbcccccccccccccccccccbbcccccccccccccccccccbbcccccccccccccccccccbbbbbac
-            cabbbbbcccccccccccccccccccbbcccccccccccccccccccbbcccccccccccccccccccbbcccccccccccccccccccbbbbbac
-            cabbbbbcccccccccccccccccccbbcccccccccccccccccccbbcccccccccccccccccccbbcccccccccccccccccccbbbbbac
-            cabbbbbcccccccccccccccccccbbcccccccccccccccccccbbcccccccccccccccccccbbcccccccccccccccccccbbbbbac
-            cabbbbbcccccccccccccccccccbbcccccccccccccccccccbbcccccccccccccccccccbbcccccccccccccccccccbbbbbac
-            cabbbbbcccccccccccccccccccbbcccccccccccccccccccbbcccccccccccccccccccbbcccccccccccccccccccbbbbbac
-            cabbbbbcccccccccccccccccccbbcccccccccccccccccccbbcccccccccccccccccccbbcccccccccccccccccccbbbbbac
-            cabbbbbcccccccccccccccccccbbcccccccccccccccccccbbcccccccccccccccccccbbcccccccccccccccccccbbbbbac
-            cabbbbbcccccccccccccccccccbbcccccccccccccccccccbbcccccccccccccccccccbbcccccccccccccccccccbbbbbac
-            cabbbbbcccccccccccccccccccbbcccccccccccccccccccbbcccccccccccccccccccbbcccccccccccccccccccbbbbbac
-            cabbbbbbcccccccccccccccccbbbbcccccccccccccccccbbbbcccccccccccccccccbbbbcccccccccccccccccbbbbbbac
-            cabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbac
-            cabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbac
-            cabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbac
-            cabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbac
-            cabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbac
-            cabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbac
-            cabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbffffffffffffffffffffffffffffbbac
-            cabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbffffffffffffffffffffffffffffffbac
-            cabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbffaaabbbccbafffffff5555555ffffbac
-            cabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbffaaabbbccbaafffff566666665fffbac
-            cabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbffaaabbbccbaaafff56666666665ffbac
-            cabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbffaaabbbbbbaaaaff56665556665ffbac
-            cabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbffaaaaaaaaaaaaaff56656665665ffbac
-            cabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbffaaaaaaaaaaaaaff56656665665ffbac
-            cabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbffaabbbbbbbbbaaff56655555665ffbac
-            cabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbffaabcccccccbaaff56656665665ffbac
-            cabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbffaabbbbbbbbbaaff56666666665ffbac
-            cabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbffaabcccccccbaafff566666665fffbac
-            cabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbffaabbbbbbbbbaaffff5555555ffffbac
-            cabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbffffffffffffffffffffffffffffffbac
-            cabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbffffffffffffffffffffffffffffbbac
-            caabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbaac
-            ccaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaacc
-            .cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc.
-            `, SpriteKind.noInteract)
-        saveSprite.setPosition(120, 200)
-        saveSprite.z = 10000
-    }
 }
 function dropArmorSystem (_type: number) {
     showArmorHUD()
@@ -29368,6 +28960,110 @@ function placeInnerTop (num: number) {
     lastCreatedTopInner.bottom = scene.screenHeight() + 45
     lastCreatedTopInner.left = num
     lastCreatedTopInner.z = -20
+}
+function openSaveMenu (open: boolean) {
+    if (open) {
+        saveMenu = true
+        saveSelection = 1
+        saveSprite = sprites.create(img`
+            .cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc.
+            ccaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaacc
+            caabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbaac
+            cabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbac
+            cabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbcccccccbbac
+            cabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbcaaaaaaacbac
+            cabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbcacaaacacbac
+            cabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbcaacacaacbac
+            cabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbcaaacaaacbac
+            cabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbcaacacaacbac
+            cabbbbbbbbbbbbbbbbbbbbbbbbbbaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabbbbbbbbbbbbbbbbcacaaacacbac
+            cabbbbbbbbbbbbbbbbbbbbbbbbbaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabbbbbbbbbbbbbbbcaaaaaaacbac
+            cabbbbbbbbbbbbbbbbbbbbbbbbbaa6aaa666a666a66aaaaa666a666a6a6a666aa666abbbbbbbbbbbbbbbbcccccccbbac
+            cabbbbbbbbbbbbbbbbbbbbbbbbbaa6aaa6a6a6a6a6a6aaaa6aaa6a6a6a6a6aaaaaa6abbbbbbbbbbbbbbbbbbbbbbbbbac
+            cabbbbbbbbbbbbbbbbbbbbbbbbbaa6aaa6a6a6a6a6a6aaaa666a6a6a6a6a666aaa66abbbbbbbbbbbbbbbbbbbbbbbbbac
+            cabbbbbbbbbbbbbbbbbbbbbbbbbaa6aaa6a6a666a6a6aaaaaa6a666a6a6a6aaaaaaaabbbbbbbbbbbbbbbbbbbbbbbbbac
+            cabbbbbbbbbbbbbbbbbbbbbbbbbaa666a666a6a6a66aaaaa666a6a6aa6aa666aaa6aabbbbbbbbbbbbbbbbbbbbbbbbbac
+            cabbbbbbbbbbbbbbbbbbbbbbbbbaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabbbbbbbbbbbbbbbbbbbbbbbbbac
+            cabbbbbbbbbbbbbbbbbbbbbbbbbbaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabbbbbbbbbbbbbbbbbbbbbbbbbbac
+            cabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbac
+            cabbbbbbaaaaaaaaaaaaaaaaabbbbaaaaaaaaaaaaaaaaabbbbaaaaaaaaaaaaaaaaabbbbaaaaaaaaaaaaaaaaabbbbbbac
+            cabbbbbaaaaaaaaaaaaaaaaaaabbaaaaaaaaaaaaaaaaaaabbaaaaaaaaaaaaaaaaaaabbaaaaaaaaaaaaaaaaaaabbbbbac
+            cabbbbbaaaaaaaaaaaaaaaaaaabbaaaaaaaaaaaaaaaaaaabbaaaaaaaaaaaaaaaaaaabbaaaaaaaaaaaaaaaaaaabbbbbac
+            cabbbbbaaaaaaaaaaaaaaaaaaabbaaaaaaaaaaaaaaaaaaabbaaaaaaaaaaaaaaaaaaabbaaaaaaaaaaaaaaaaaaabbbbbac
+            cabbbbbaaaaaaaaaaaaaaaaaaabbaaaaaaaaaaaaaaaaaaabbaaaaaaaaaaaaaaaaaaabbaaaaaaaaaaaaaaaaaaabbbbbac
+            cabbbbbaaaaaeeeeeeeecaaaaabbaaaaa44444444caaaaabbaaaaa11111111caaaaabbaaaaa535335354aaaaabbbbbac
+            cabbbbbaaaaaeeeeeeeecaaaaabbaaaaa44444444caaaaabbaaaaa14444441caaaaabbaaaaa558575654aaaaabbbbbac
+            cabbbbbaaaaaeddddddecaaaaabbaaaaa4444dd44caaaaabbaaaaa44111144faaaaabbaaaaa555555554aaaaabbbbbac
+            cabbbbbaaaaaddddddddbaaaaabbaaaaa444dddd4caaaaabbaaaaa4ff11ff4faaaaabbaaaaaf133331f2aaaaabbbbbac
+            cabbbbbaaaaad18dd81dbaaaaabbaaaaad16dd61d4aaaaabbaaaaa4ff11ff4faaaaabbaaaaa333333332aaaaabbbbbac
+            cabbbbbaaaaadddaadddbaaaaabbaaaaadddddddd4aaaaabbaaaaa411ba114faaaaabbaaaaa33c32c332aaaaabbbbbac
+            cabbbbbaaaaaddeddeddbaaaaabbaaaaaddd33ddd4aaaaabbaaaaa4f1111f4faaaaabbaaaaa332222332aaaaabbbbbac
+            cabbbbbaaaaaddeeeeddbaaaaabbaaaaadddddddd4aaaaabbaaaaa4f1ff1f4faaaaabbaaaaa333333332aaaaabbbbbac
+            cabbbbbaaa77777ddd7777caaabbaaa6668dd444446caaabbaaa411114411114faaabbaaa2221a11a1222caaabbbbbac
+            cabbbbbaaa777777d77777caaabbaaa66668dd44466caaabbaaa144144441441faaabbaaa222ba11bb222caaabbbbbac
+            cabbbbbaaa777777777777caaabbaaa888688844888caaabbaaa111141141111faaabbaaa222a1151b222caaabbbbbac
+            cabbbbbaaaddd777777dddbaaabbaaaddd666446dddbaaabbaaa111114411111faaabbaaa222a1111a222caaabbbbbac
+            cabbbbbaaaddd777777dddbaaabbaaaddd666466dddbaaabbaaa111114411111faaabbaaa111b1151b111caaabbbbbac
+            cabbbbbaaaddd777777dddbaaabbaaaddd666666dddbaaabbaaa111114111111faaabbaaa111b1111a111caaabbbbbac
+            cabbbbbbaaddd777777dddbaabbbbaaddd666666dddbaabbbbaa114444444411faabbbbaa333a1151a333caabbbbbbac
+            cabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbac
+            cabbbbbb22222222222222222bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbac
+            cabbbbb2222222222222222222bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbac
+            cabbbbb2222222222222222222bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbac
+            cabbbbb2222223333333222222bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbac
+            cabbbbb2222223222223222222bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbac
+            cabbbbb2223333333333333222bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbaaaaaaaaaaaaaaaaaaaaaaaaaaaabbac
+            cabbbbb2223222222222223222bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabac
+            cabbbbb2223333333333333222bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbaacccbbbccbcaaaaaaa5555555aaaabac
+            cabbbbb2222323232323232222bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbaacccbbbccbccaaaaa566666665aaabac
+            cabbbbb2222323232323232222bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbaacccbbbccbcccaaa56666666665aabac
+            cabbbbb2222323232323232222bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbaacccbbbbbbccccaa56665556665aabac
+            cabbbbb2222323232323232222bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbaacccccccccccccaa56656665665aabac
+            cabbbbb2222323232323232222bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbaacccccccccccccaa56656665665aabac
+            cabbbbb2222323232323232222bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbaaccbbbbbbbbbccaa56655555665aabac
+            cabbbbb2222323232323232222bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbaaccbcccccccbccaa56656665665aabac
+            cabbbbb2222323232323232222bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbaaccbbbbbbbbbccaa56666666665aabac
+            cabbbbb2222323232323232222bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbaaccbcccccccbccaaa566666665aaabac
+            cabbbbb2222333333333332222bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbaaccbbbbbbbbbccaaaa5555555aaaabac
+            cabbbbb2222222222222222222bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabac
+            cabbbbbb22222222222222222bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbaaaaaaaaaaaaaaaaaaaaaaaaaaaabbac
+            caabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbaac
+            ccaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaacc
+            .cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc.
+            `, SpriteKind.noInteract)
+        saveSelectorSprite = sprites.create(img`
+            .55555555555555555.
+            55...............55
+            5.................5
+            5.................5
+            5.................5
+            5.................5
+            5.................5
+            5.................5
+            5.................5
+            5.................5
+            5.................5
+            5.................5
+            5.................5
+            5.................5
+            5.................5
+            5.................5
+            5.................5
+            5.................5
+            55...............55
+            .55555555555555555.
+            `, SpriteKind.noInteract)
+        saveSprite.setPosition(120, 200)
+        saveSelectorSprite.setPosition(89, 198)
+        saveSprite.z = 10000
+        saveSelectorSprite.z = 10000
+        readSave()
+    } else {
+        story.clearAllText()
+        saveMenu = false
+        sprites.destroy(saveSprite)
+        sprites.destroy(saveSelectorSprite)
+    }
 }
 sprites.onDestroyed(SpriteKind.playerArrow, function (sprite) {
     if (sprites.readDataBoolean(sprite, "isFirework")) {
@@ -31596,6 +31292,476 @@ function NetherBackgroundSequence () {
         placeInnerTop(lastCreatedTopInner.right)
     }
 }
+controller.down.onEvent(ControllerButtonEvent.Released, function () {
+    if (startsequence && !(mapActive)) {
+        if (!(tridentSequenceLockout) && (attack == 0 && !(blocking)) && aiming) {
+            arrowCalculatedPower = calcArrowPower(arrowCharge)
+            sprites.destroy(chargeDot)
+            sprites.destroy(playerBow)
+            if (!(arrowCharge < 8)) {
+                playerArrow = sprites.create(img`
+                    . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . f . . . . . . 
+                    . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . 
+                    `, SpriteKind.Projectile)
+                playerArrow.setKind(SpriteKind.playerArrow)
+                playerArrow.lifespan = 2000
+                if (!(fireworkBowUpgrade)) {
+                    if (angle > 87) {
+                        playerArrow.setImage(img`
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . 1 . . . . . . . 
+                            . . . . . . . 1 1 1 . . . . . . 
+                            . . . . . . . 1 e 1 . . . . . . 
+                            . . . . . . . . e . . . . . . . 
+                            . . . . . . . . e . . . . . . . 
+                            . . . . . . . . e . . . . . . . 
+                            . . . . . . . . e . . . . . . . 
+                            . . . . . . . . e . . . . . . . 
+                            . . . . . . . 1 e 1 . . . . . . 
+                            . . . . . . . 1 e 1 . . . . . . 
+                            . . . . . . . 1 . 1 . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            `)
+                    } else if (angle > 81) {
+                        playerArrow.setImage(img`
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . 1 . . . . . . . 
+                            . . . . . . . 1 1 1 . . . . . . 
+                            . . . . . . . 1 e 1 . . . . . . 
+                            . . . . . . . . e . . . . . . . 
+                            . . . . . . . . e . . . . . . . 
+                            . . . . . . . e e . . . . . . . 
+                            . . . . . . . 1 e . . . . . . . 
+                            . . . . . . 1 1 1 . . . . . . . 
+                            . . . . . . 1 1 1 . . . . . . . 
+                            . . . . . . . . 1 . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            `)
+                    } else if (angle > 70) {
+                        playerArrow.setImage(img`
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . 1 . . . . . . 
+                            . . . . . . . . 1 1 . . . . . . 
+                            . . . . . . . . 1 1 . . . . . . 
+                            . . . . . . . . e e . . . . . . 
+                            . . . . . . . . e . . . . . . . 
+                            . . . . . . . . e . . . . . . . 
+                            . . . . . . . 1 e . . . . . . . 
+                            . . . . . . 1 1 1 . . . . . . . 
+                            . . . . . . 1 1 1 . . . . . . . 
+                            . . . . . . . 1 1 . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            `)
+                    } else if (angle > 60) {
+                        playerArrow.setImage(img`
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . 1 . . . . . . 
+                            . . . . . . . . 1 1 . . . . . . 
+                            . . . . . . . . 1 1 . . . . . . 
+                            . . . . . . . . e . . . . . . . 
+                            . . . . . . . . e . . . . . . . 
+                            . . . . . . . e . . . . . . . . 
+                            . . . . . . 1 e . . . . . . . . 
+                            . . . . . 1 1 1 . . . . . . . . 
+                            . . . . . 1 1 1 . . . . . . . . 
+                            . . . . . . 1 1 . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            `)
+                    } else if (angle > 50) {
+                        playerArrow.setImage(img`
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . 1 1 . . . . 
+                            . . . . . . . . . 1 1 . . . . . 
+                            . . . . . . . . 1 e 1 . . . . . 
+                            . . . . . . . . e . . . . . . . 
+                            . . . . . . . e . . . . . . . . 
+                            . . . . . . 1 1 . . . . . . . . 
+                            . . . . . 1 1 1 . . . . . . . . 
+                            . . . . 1 1 1 . . . . . . . . . 
+                            . . . . . 1 . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            `)
+                    } else if (angle > 40) {
+                        playerArrow.setImage(img`
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . 1 1 . . . 
+                            . . . . . . . . . . 1 1 1 . . . 
+                            . . . . . . . . . . e 1 . . . . 
+                            . . . . . . . . . e . . . . . . 
+                            . . . . . . . . e . . . . . . . 
+                            . . . . . . 1 e . . . . . . . . 
+                            . . . . . 1 1 1 . . . . . . . . 
+                            . . . . 1 1 1 . . . . . . . . . 
+                            . . . . . 1 . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            `)
+                    } else if (angle > 34) {
+                        playerArrow.setImage(img`
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . 1 1 . . . 
+                            . . . . . . . . . 1 1 1 1 . . . 
+                            . . . . . . . . . e 1 . . . . . 
+                            . . . . . . . e e . . . . . . . 
+                            . . . . 1 1 e e . . . . . . . . 
+                            . . . 1 1 1 1 . . . . . . . . . 
+                            . . . . 1 1 . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            `)
+                    } else if (angle > 20) {
+                        playerArrow.setImage(img`
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . 1 1 1 . . . 
+                            . . . . . . . . e e 1 1 . . . . 
+                            . . . . 1 1 1 e . . . . . . . . 
+                            . . . 1 e 1 1 . . . . . . . . . 
+                            . . . . 1 1 . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            `)
+                    } else if (angle > 10) {
+                        playerArrow.setImage(img`
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . 1 1 . . . . 
+                            . . . 1 1 1 . e e e 1 1 1 . . . 
+                            . . . 1 1 1 1 e . . . . . . . . 
+                            . . . . 1 1 1 . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            `)
+                    } else {
+                        playerArrow.setImage(img`
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . 1 1 1 . . . . . 1 1 . . . 
+                            . . . . e e e e e e e e 1 1 . . 
+                            . . . 1 1 1 . . . . . 1 1 . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            `)
+                    }
+                } else {
+                    sprites.setDataBoolean(playerArrow, "isFirework", true)
+                    playerArrow.lifespan = 300
+                    if (angle > 87) {
+                        playerArrow.setImage(img`
+                            . . . . . . . . 2 . . . . . . . 
+                            . . . . . . . 2 2 2 . . . . . . 
+                            . . . . . . 2 2 2 2 2 . . . . . 
+                            . . . . . . 2 2 2 2 2 . . . . . 
+                            . . . . . . . 1 1 2 . . . . . . 
+                            . . . . . . . 1 2 2 . . . . . . 
+                            . . . . . . . 2 2 1 . . . . . . 
+                            . . . . . . . 2 1 1 . . . . . . 
+                            . . . . . . . 1 1 2 . . . . . . 
+                            . . . . . . . 1 2 2 . . . . . . 
+                            . . . . . . . 2 2 1 . . . . . . 
+                            . . . . . . . 2 f 1 . . f f . . 
+                            . . . . . . . . f . . f . . . . 
+                            . . . . . . . . . f f . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            `)
+                    } else if (angle > 81) {
+                        playerArrow.setImage(img`
+                            . . . . . . . . 2 2 . . . . . . 
+                            . . . . . . . 2 2 2 2 . . . . . 
+                            . . . . . . 2 2 2 2 2 . . . . . 
+                            . . . . . . 2 2 2 2 2 . . . . . 
+                            . . . . . . . 1 1 2 . . . . . . 
+                            . . . . . . . 1 2 2 . . . . . . 
+                            . . . . . . . 2 2 1 . . . . . . 
+                            . . . . . . 2 1 1 . . . . . . . 
+                            . . . . . . 1 1 2 . . . . . . . 
+                            . . . . . . 1 2 2 . . . . . . . 
+                            . . . . . . 2 2 1 . . . . . . . 
+                            . . . . . . 2 f 1 . . f f . . . 
+                            . . . . . . . f . . f . . . . . 
+                            . . . . . . . . f f . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            `)
+                    } else if (angle > 70) {
+                        playerArrow.setImage(img`
+                            . . . . . . . . 2 2 . . . . . . 
+                            . . . . . . . 2 2 2 . . . . . . 
+                            . . . . . . 2 2 2 2 . . . . . . 
+                            . . . . . . 2 2 2 2 . . . . . . 
+                            . . . . . . . 1 1 2 . . . . . . 
+                            . . . . . . 1 2 2 . . . . . . . 
+                            . . . . . . 2 2 1 . . . . . . . 
+                            . . . . . . 2 1 1 . . . . . . . 
+                            . . . . . . 1 1 2 . . . . . . . 
+                            . . . . . 1 2 2 . . . . . . . . 
+                            . . . . . 2 2 1 . . f . . . . . 
+                            . . . . . 2 f 1 . . f . . . . . 
+                            . . . . . . f . . f . . . . . . 
+                            . . . . . . . f f . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            `)
+                    } else if (angle > 60) {
+                        playerArrow.setImage(img`
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . 2 2 2 . . . . . 
+                            . . . . . . . 2 2 2 2 . . . . . 
+                            . . . . . . 2 2 2 2 2 . . . . . 
+                            . . . . . . 2 2 2 2 . . . . . . 
+                            . . . . . . . 1 1 2 . . . . . . 
+                            . . . . . . 1 2 2 . . . . . . . 
+                            . . . . . . 2 2 1 . . . . . . . 
+                            . . . . . 2 1 1 . . . . . . . . 
+                            . . . . . 1 1 2 . . . . . . . . 
+                            . . . . 1 2 2 . . . . . . . . . 
+                            . . . . 2 2 1 . . f . . . . . . 
+                            . . . . 2 f 1 . . f . . . . . . 
+                            . . . . . f . . f . . . . . . . 
+                            . . . . . . f f . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            `)
+                    } else if (angle > 50) {
+                        playerArrow.setImage(img`
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . 2 2 2 2 . 
+                            . . . . . . . . . . 2 2 2 2 2 . 
+                            . . . . . . . . . . 1 2 2 2 2 . 
+                            . . . . . . . . . 1 1 1 2 2 2 . 
+                            . . . . . . . . 2 2 2 1 1 2 . . 
+                            . . . . . . . 1 1 2 2 2 . . . . 
+                            . . . . . . 1 1 1 1 1 . . . . . 
+                            . . . . . . 2 2 1 1 . . . . . . 
+                            . . . . . f f 2 2 . . . . . . . 
+                            . . . . f . . . . . . . . . . . 
+                            . . . . f . . f . . . . . . . . 
+                            . . . . . f f . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            `)
+                    } else if (angle > 40) {
+                        playerArrow.setImage(img`
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . 2 2 2 2 . 
+                            . . . . . . . . . . 2 2 2 2 2 . 
+                            . . . . . . . . . . 1 2 2 2 2 . 
+                            . . . . . . . . . 1 1 1 2 2 2 . 
+                            . . . . . . . . 2 2 2 1 1 2 . . 
+                            . . . . . . . 1 1 2 2 2 . . . . 
+                            . . . . . . 1 1 1 1 1 . . . . . 
+                            . . . . . . 2 2 1 1 . . . . . . 
+                            . . . . . f f 2 2 . . . . . . . 
+                            . . . . f . . . . . . . . . . . 
+                            . . . . f . . f . . . . . . . . 
+                            . . . . . f f . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            `)
+                    } else if (angle > 34) {
+                        playerArrow.setImage(img`
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . 2 2 2 2 . 
+                            . . . . . . . . . . 2 2 2 2 2 . 
+                            . . . . . . . . . . 1 2 2 2 2 . 
+                            . . . . . . . . . 1 1 1 2 2 2 . 
+                            . . . . . . . . 2 2 2 1 1 2 . . 
+                            . . . . . . . 1 1 2 2 2 . . . . 
+                            . . . . . . 1 1 1 1 1 . . . . . 
+                            . . . . . . 2 2 1 1 . . . . . . 
+                            . . . . . f f 2 2 . . . . . . . 
+                            . . . . f . . . . . . . . . . . 
+                            . . . . f . . f . . . . . . . . 
+                            . . . . . f f . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            `)
+                    } else if (angle > 20) {
+                        playerArrow.setImage(img`
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . 2 2 2 2 . 
+                            . . . . . . . . . 2 2 2 2 2 2 . 
+                            . . f f . . . . 1 2 2 2 2 2 . . 
+                            . f . . f . 2 1 2 2 1 2 2 2 . . 
+                            . f . 1 1 2 1 1 2 1 . 2 . . . . 
+                            . . f f 2 2 1 2 . . . . . . . . 
+                            . . . 2 2 1 . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            `)
+                    } else if (angle > 10) {
+                        playerArrow.setImage(img`
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . f . . . . . . . . . . . 
+                            . . . f . . . . . . . . 2 2 2 . 
+                            . . f . . . . . . 1 2 2 2 2 2 2 
+                            . . f . 1 1 2 2 1 2 2 1 2 2 2 2 
+                            . . . f f 2 2 1 1 2 1 1 2 2 2 . 
+                            . . . . 2 2 1 1 2 . . . 2 2 . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            `)
+                    } else {
+                        playerArrow.setImage(img`
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . f . . . . . . . . . . 
+                            . . . f f . . . . . . . . . . . 
+                            . . f . . . . . . . . . 2 2 . . 
+                            . . f . 1 1 2 2 1 1 2 2 2 2 2 . 
+                            . . . f f 2 2 1 1 2 2 1 2 2 2 2 
+                            . . . . 2 2 1 1 2 2 1 1 2 2 2 . 
+                            . . . . . . . . . . . . 2 2 . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            `)
+                    }
+                }
+                angle = 0
+                playerArrow.startEffect(effects.spray, 300)
+                playerArrow.setPosition(xTear.x, xTear.y)
+                playerArrowDX = endX - xTear.x
+                playerArrowDY = endY - xTear.y
+                playerArrowDistance = Math.sqrt(playerArrowDX * playerArrowDX + playerArrowDY * playerArrowDY)
+                playerArrow.vx = playerArrowDX / (playerArrowDistance * arrowCalculatedPower)
+                playerArrow.vy = playerArrowDY / (playerArrowDistance * arrowCalculatedPower)
+                music.setVolume(255)
+                if (arrowCharge >= 8) {
+                    music.play(music.createSoundEffect(WaveShape.Sawtooth, 419, 241, 255, 0, 200, SoundExpressionEffect.Warble, InterpolationCurve.Linear), music.PlaybackMode.InBackground)
+                }
+                if (arrowCharge > 14) {
+                    music.play(music.createSoundEffect(WaveShape.Sawtooth, 983, 983, 255, 0, 200, SoundExpressionEffect.Warble, InterpolationCurve.Linear), music.PlaybackMode.InBackground)
+                }
+                if (arrowCharge >= 20) {
+                    music.play(music.createSoundEffect(WaveShape.Sawtooth, 1250, 1191, 255, 0, 150, SoundExpressionEffect.Warble, InterpolationCurve.Linear), music.PlaybackMode.InBackground)
+                }
+                arrowGravity = true
+            }
+            if (DiamondSet == 4) {
+                animation.runImageAnimation(
+                xTear,
+                playerAnimations[3][1],
+                175,
+                true
+                )
+            } else if (IronSet == 4) {
+                animation.runImageAnimation(
+                xTear,
+                playerAnimations[2][1],
+                175,
+                true
+                )
+            } else if (GoldSet == 4) {
+                animation.runImageAnimation(
+                xTear,
+                playerAnimations[1][1],
+                175,
+                true
+                )
+            } else {
+                animation.runImageAnimation(
+                xTear,
+                playerAnimations[0][1],
+                175,
+                true
+                )
+            }
+            angle = 0
+        }
+        timer.after(100, function () {
+            aiming = false
+        })
+    }
+})
 sprites.onOverlap(SpriteKind.Player, SpriteKind.Food, function (sprite, otherSprite) {
     if (otherSprite == apple) {
         sprites.destroy(otherSprite, effects.hearts, 100)
@@ -31900,11 +32066,15 @@ let goldenapple: Sprite = null
 let cake: Sprite = null
 let goldencarrot: Sprite = null
 let apple: Sprite = null
+let playerArrowDistance = 0
+let playerArrowDY = 0
+let playerArrowDX = 0
+let playerArrow: Sprite = null
+let arrowCalculatedPower = 0
 let SplashText: string[] = []
+let saveSprite: Sprite = null
 let shield: Sprite = null
 let storedArmorDrop = 0
-let saveSprite: Sprite = null
-let saveSelection = 0
 let EndPillar: Sprite = null
 let End_Crystal: Sprite = null
 let AllLevelBanners: Image[] = []
@@ -31918,6 +32088,7 @@ let lastCreatedTopInner: Sprite = null
 let lastCreatedBottomInner: Sprite = null
 let UpperCaveUnderlay: Image[] = []
 let BottomCaveUnderlay: Image[] = []
+let playerBow: Sprite = null
 let UpperCaveOverlay: Image[] = []
 let lastCreatedCeiling: Sprite = null
 let diamond_boots: Sprite = null
@@ -31962,12 +32133,12 @@ let healthbar: Sprite = null
 let foodbar: Sprite = null
 let fireworkExplosions: Image[][] = []
 let fireworkExplosion: Sprite = null
-let TridentAttack = false
 let mobArrow: Sprite = null
 let mobArrowAngle = 0
 let deltaY = 0
 let deltaX = 0
-let chargingLeap = false
+let petAllay: Sprite = null
+let boolUnlockStringRead = ""
 let specialLootSprites: Image[][] = []
 let fallingTNT: Sprite = null
 let gamemodeSystem = 0
@@ -31981,6 +32152,7 @@ let mobHealth: number[][] = []
 let mobHurt: Image[][][] = []
 let BottomCaveOverlay: Image[] = []
 let lastCreatedCave: Sprite = null
+let commandBlocks = 0
 let LootRollSprite: Sprite = null
 let mobAnimationSpeed: number[][] = []
 let FireballDistance = 0
@@ -31988,14 +32160,7 @@ let FireballDY = 0
 let FireballDX = 0
 let Fireball: Sprite = null
 let mobAnimation: Image[][][] = []
-let inair = 0
 let ShowingArmorHUD = false
-let playerArrowDistance = 0
-let playerArrowDY = 0
-let playerArrowDX = 0
-let playerArrow: Sprite = null
-let playerBow: Sprite = null
-let arrowCalculatedPower = 0
 let witherBeamPathing = false
 let showWitherBeam = false
 let eye3Y = 0
@@ -32010,35 +32175,48 @@ let beam1Coords: Sprite = null
 let witherStormEyeTracedSprite: Sprite = null
 let witherstormSprite: Sprite = null
 let witherStormActive = false
+let mapSelection = 0
 let endY = 0
 let endX = 0
 let angle = 0
-let upButtonPressed = false
 let chargeDot: Sprite = null
 let arrowCharge = 0
 let tridentSequenceLockout = false
-let mapActive = false
 let invincibilityFrame = false
-let netheriteUpgrade = false
 let swordDamage = 0
 let canCrit = false
-let holdingTrident = false
+let saveSystemTrip = false
+let chargingLeap = false
 let witherStormEyeTrace: Image = null
 let newColor = 0
 let oldColor = 0
 let boolUnlockData = ""
-let petAllay: Sprite = null
-let totemOfUndying = 0
+let netheriteUpgrade = false
+let bowUnlocked = false
+let fireworkBowUpgrade = false
+let totemOfUndying = false
 let BedrockShield = false
 let DoubleHealth = false
-let bossSwordUnlocked = 0
+let bossSwordUnlocked = false
+let BossHammerUnlocked = false
 let boolUnlockDataArray: string[] = []
 let EyesCollected = 0
-let commandblocksAvailable = 0
+let WitherSkulls = 0
+let commandBlocksAvailable = 0
 let NetheriteIngots = 0
+let levelUnlocked = 0
 let End = false
-let blocking = false
+let saveSelectorSprite: Sprite = null
+let saveSelection = 0
+let saveMenu = false
+let holdingTrident = false
 let attack = 0
+let blocking = false
+let inair = 0
+let TridentAttack = false
+let TridentUnlocked = false
+let upButtonPressed = false
+let mapActive = false
 let totalArmor = 0
 let slot4Boots: Sprite = null
 let armorSlot4: Sprite = null
@@ -32052,9 +32230,9 @@ let armorProtectionValues: number[] = []
 let currentArmorEquipped: number[] = []
 let LeapingCharge = 0
 let jumpLock = false
+let xTearLeapingSprite: Sprite = null
 let playerAnimations: Image[][][] = []
 let xTear: Sprite = null
-let xTearLeapingSprite: Sprite = null
 let diabootsactive = false
 let dialegsactive = false
 let diachestactive = false
@@ -32086,25 +32264,9 @@ let hardmode = 0
 let scopePull = 0
 let radius = 0
 let Level = 0
-let mapSelection = 0
-let WitherSkulls = 0
-let commandBlocks = 0
-let levelUnlocked = 0
-let bowUnlocked = false
-let fireworkBowUpgrade = false
-let TridentUnlocked = false
-let BossHammerUnlocked = false
 let skipIntro = false
 skipIntro = true
 Load()
-BossHammerUnlocked = true
-TridentUnlocked = true
-fireworkBowUpgrade = true
-bowUnlocked = true
-levelUnlocked = 17
-commandBlocks = 3
-WitherSkulls = 3
-mapSelection = 1
 game.onUpdateInterval(600, function () {
     if (End == false) {
         for (let value of sprites.allOfKind(SpriteKind.InnerTop)) {
@@ -32200,6 +32362,12 @@ forever(function () {
         swordDamage = 8
     } else {
         swordDamage = 6
+    }
+})
+game.onUpdateInterval(1000, function () {
+    let playingLevel = 0
+    if (playingLevel) {
+        info.changeScoreBy(10)
     }
 })
 game.onUpdateInterval(1600, function () {
@@ -32855,9 +33023,6 @@ game.onUpdateInterval(20, function () {
             })
         }
     }
-})
-game.onUpdateInterval(1000, function () {
-    info.changeScoreBy(10)
 })
 forever(function () {
     if (health <= 0) {
