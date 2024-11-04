@@ -47,6 +47,7 @@ namespace SpriteKind {
     export const debris = SpriteKind.create()
 }
 function startingVariables () {
+    levelUnlocked = 1
     Level = 0
     radius = 15
     scopePull = 1
@@ -62,13 +63,10 @@ function startingVariables () {
     xTearLeapingGravity = false
     shieldHP = 500
     returntosenderachievement = 0
-    getdiamondarmor = 0
-    getgoldarmor = 0
-    getironarmor = 0
     DiamondSet = 0
     IronSet = 0
     GoldSet = 0
-    startsequence = false
+    runGame = false
     aiming = false
     arrowGravity = false
     defaultSword = true
@@ -877,6 +875,21 @@ function updateArmorSystem () {
     for (let index = 0; index <= 4; index++) {
         totalArmor += armorProtectionValues[index]
     }
+    if (GoldSet == 4) {
+        GoldSword = true
+        swordDamage = 8
+    } else if (IronSet == 4) {
+        ironSword = true
+        swordDamage = 10
+    } else if (DiamondSet == 4) {
+        diamondSword = true
+        swordDamage = 12
+    } else if (NetheriteIngots == 4) {
+        netheriteUpgrade = true
+        swordDamage = 15
+    } else {
+        swordDamage = 6
+    }
 }
 function smallLeap () {
     xTearLeapingSprite.setVelocity(40, -130)
@@ -995,60 +1008,9 @@ function smallLeap () {
         })
     })
 }
-controller.up.onEvent(ControllerButtonEvent.Pressed, function () {
-    if (startsequence) {
-        if (!(mapActive)) {
-            upButtonPressed = true
-            if (TridentUnlocked && (!(TridentAttack) && (inair == 0 && canLeapingAttack && (!(blocking) && !(aiming) && attack == 0)))) {
-                holdingTrident = true
-                attack = 1
-                if (DiamondSet == 4) {
-                    animation.runImageAnimation(
-                    xTear,
-                    playerAnimations[3][11],
-                    100,
-                    true
-                    )
-                } else if (IronSet == 4) {
-                    animation.runImageAnimation(
-                    xTear,
-                    playerAnimations[2][11],
-                    100,
-                    true
-                    )
-                } else if (GoldSet == 4) {
-                    animation.runImageAnimation(
-                    xTear,
-                    playerAnimations[1][11],
-                    100,
-                    true
-                    )
-                } else {
-                    animation.runImageAnimation(
-                    xTear,
-                    playerAnimations[0][11],
-                    100,
-                    true
-                    )
-                }
-            }
-        }
-    } else {
-        if (saveMenu) {
-            if (saveSelection == 5) {
-                saveSelection = 1
-                saveSelectorSprite.setPosition(89, 198)
-                readSave()
-            } else {
-                saveSelection = 6
-                saveSelectorSprite.setPosition(166, 182)
-                timer.background(function () {
-                    story.clearAllText()
-                    story.spriteSayText(saveSelectorSprite, "Close?", 1, 10, story.TextSpeed.VeryFast)
-                })
-                readSave()
-            }
-        }
+controller.menu.onEvent(ControllerButtonEvent.Pressed, function () {
+    if (skipIntro) {
+        map()
     }
 })
 function StopBackgroundSequence () {
@@ -1212,33 +1174,6 @@ function beamShift (screen2: Image, width: number, height: number) {
         }
     }
 }
-controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
-    if (startsequence && BossHammerUnlocked) {
-        if (!(mapActive)) {
-            chargingLeap = true
-            LeapingCharge = 0
-        }
-    } else {
-        if (!(saveMenu)) {
-            openSaveMenu(true)
-        } else {
-            if (saveSystemTrip) {
-                timer.background(function () {
-                    saveSystemTrip = false
-                    story.clearAllText()
-                    overwriteSave(saveSelection)
-                    story.spriteSayText(saveSelectorSprite, "complete!", 6, 1, story.TextSpeed.VeryFast)
-                })
-            } else {
-                timer.background(function () {
-                    story.clearAllText()
-                    saveSystemTrip = true
-                    story.spriteSayText(saveSelectorSprite, "overwrite file with current data?", 4, 1, story.TextSpeed.VeryFast)
-                })
-            }
-        }
-    }
-})
 function drawEyeBeam (eyeX: number, eyeY: number, beamCoords: Sprite) {
     for (let index = 0; index <= 15; index++) {
         witherStormEyeTrace.drawLine(eyeX - 0, eyeY - 0, beamCoords.x + index * 6, beamCoords.y, 10)
@@ -1453,7 +1388,7 @@ function Load () {
     waitForPlay()
 }
 sprites.onOverlap(SpriteKind.Player, SpriteKind.mob, function (sprite, otherSprite) {
-    if (startsequence) {
+    if (runGame) {
         if (attack == 1 && holdingTrident) {
             if (Math.percentChance(10)) {
                 attack = 0
@@ -1550,112 +1485,8 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.mob, function (sprite, otherSpri
     }
 })
 controller.left.onEvent(ControllerButtonEvent.Released, function () {
-    if (startsequence) {
+    if (runGame) {
         blocking = false
-    }
-})
-controller.down.onEvent(ControllerButtonEvent.Repeated, function () {
-    if (startsequence && !(mapActive)) {
-        if (!(tridentSequenceLockout) && aiming && (attack == 0 && !(blocking))) {
-            if (!(fireworkBowUpgrade)) {
-                if (arrowCharge < 20) {
-                    arrowCharge += 0.75
-                }
-            } else {
-                arrowCharge = 30
-            }
-            if (arrowCharge >= 20) {
-                chargeDot.setImage(img`
-                    . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . 
-                    . . . . . . . 9 . . . . . . . . 
-                    . . . . . . . 9 . . . . . . . . 
-                    . . . . . . . 9 . . . . . . . . 
-                    . . . . 9 9 9 . 9 9 9 . . . . . 
-                    . . . . . . . 9 . . . . . . . . 
-                    . . . . . . . 9 . . . . . . . . 
-                    . . . . . . . 9 . . . . . . . . 
-                    . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . 
-                    `)
-                radius = 90
-            } else if (arrowCharge > 14) {
-                chargeDot.setImage(img`
-                    . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . 
-                    . . . . . . . 4 . . . . . . . . 
-                    . . . . . . . 4 . . . . . . . . 
-                    . . . . . 4 4 . 4 4 . . . . . . 
-                    . . . . . . . 4 . . . . . . . . 
-                    . . . . . . . 4 . . . . . . . . 
-                    . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . 
-                    `)
-                radius = 70
-            } else if (arrowCharge > 6) {
-                chargeDot.setImage(img`
-                    . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . 
-                    . . . . . . . 2 . . . . . . . . 
-                    . . . . . . 2 2 2 . . . . . . . 
-                    . . . . . . . 2 . . . . . . . . 
-                    . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . 
-                    `)
-                radius = 40
-            } else {
-                chargeDot.setImage(img`
-                    . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . 
-                    . . . . . . . 2 . . . . . . . . 
-                    . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . 
-                    `)
-                radius = 25
-            }
-            chargeDot.setPosition(xTear.x, xTear.y)
-            chargeDot.z = 10000
-            if (upButtonPressed) {
-                angle = Math.min(angle + 2, 90)
-            } else {
-                angle = Math.max(0, angle - scopePull)
-            }
-            endX = xTear.x + radius * Math.cos(angle * 3.1415927 / 180)
-            endY = xTear.y - radius * Math.sin(angle * 3.1415927 / 180)
-            chargeDot.setPosition(endX, endY)
-        }
     }
 })
 function PotionEffect (Boosted: boolean) {
@@ -1666,109 +1497,6 @@ function PotionEffect (Boosted: boolean) {
         xTear.startEffect(effects.bubbles)
     }
 }
-controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
-    if (startsequence) {
-        chargingLeap = false
-        LeapingCharge = 0
-        if (angle < 15) {
-            angle += 15
-        }
-        if (inair == 0 && !(jumpLock) && !(tridentSequenceLockout)) {
-            inair = 1
-            xTear.vy = -115
-            if (DiamondSet == 4) {
-                animation.runImageAnimation(
-                xTear,
-                playerAnimations[3][2],
-                1000,
-                false
-                )
-            } else if (IronSet == 4) {
-                animation.runImageAnimation(
-                xTear,
-                playerAnimations[2][2],
-                1000,
-                false
-                )
-            } else if (GoldSet == 4) {
-                animation.runImageAnimation(
-                xTear,
-                playerAnimations[1][2],
-                1000,
-                false
-                )
-            } else {
-                animation.runImageAnimation(
-                xTear,
-                playerAnimations[0][2],
-                1000,
-                false
-                )
-            }
-            timer.after(500, function () {
-                if (!(aiming)) {
-                    defaultAnimatePlayer()
-                } else {
-                    if (diamondSword) {
-                        animation.runImageAnimation(
-                        xTear,
-                        playerAnimations[3][4],
-                        100,
-                        true
-                        )
-                    } else if (ironSword) {
-                        animation.runImageAnimation(
-                        xTear,
-                        playerAnimations[2][4],
-                        100,
-                        true
-                        )
-                    } else if (GoldSword) {
-                        animation.runImageAnimation(
-                        xTear,
-                        playerAnimations[1][4],
-                        100,
-                        true
-                        )
-                    } else {
-                        animation.runImageAnimation(
-                        xTear,
-                        playerAnimations[0][4],
-                        100,
-                        true
-                        )
-                    }
-                }
-            })
-        }
-    } else if (mapActive) {
-        playLevel(mapSelection)
-    } else if (saveMenu) {
-        if (saveSelection == 6) {
-            openSaveMenu(false)
-        } else if (saveSelection == 5) {
-            blockSettings.clear()
-            timer.background(function () {
-                story.clearAllText()
-                story.spriteSayText(saveSelectorSprite, "Saves erased!", 6, 1)
-            })
-        } else {
-            if (!(blockSettings.readString("" + saveSelection + "name").isEmpty())) {
-                loadSave(saveSelection)
-                openSaveMenu(false)
-            } else {
-                timer.background(function () {
-                    scene.cameraShake(2, 100)
-                    story.clearAllText()
-                    story.spriteSayText(saveSelectorSprite, "no file found", 2, 1)
-                })
-            }
-        }
-    } else {
-        effects.confetti.endScreenEffect()
-        GameIntro()
-    }
-})
 function startStorm () {
     color.startFadeFromCurrent(color.Black, 1000)
     timer.after(1000, function () {
@@ -4252,29 +3980,6 @@ function mobRunArmoredBlaze (Blaze: Sprite) {
         })
     })
 }
-controller.left.onEvent(ControllerButtonEvent.Pressed, function () {
-    if (startsequence) {
-    	
-    } else {
-        if (mapActive) {
-            if (!(mapSelection <= 1)) {
-                mapSelection += -1
-                map()
-            }
-        }
-        if (saveMenu) {
-            if (saveSelection > 1) {
-                saveSelection += -1
-                saveSelectorSprite.x += -21
-                readSave()
-            } else {
-                saveSelection = 4
-                saveSelectorSprite.setPosition(152, 198)
-                readSave()
-            }
-        }
-    }
-})
 function placeCave (num: number) {
     lastCreatedCave = sprites.create(BottomCaveOverlay._pickRandom(), SpriteKind.Caves)
     lastCreatedCave.setFlag(SpriteFlag.Ghost, true)
@@ -4294,6 +3999,21 @@ function mobDamageProcessingSystem (damage: number, sprite: Sprite) {
             100,
             false
             )
+            if (sprites.readDataNumber(sprite, "col") == 0 && sprites.readDataNumber(sprite, "row") == 1 || sprites.readDataNumber(sprite, "col") == 0 && sprites.readDataNumber(sprite, "row") == 7) {
+                if (Math.percentChance(10)) {
+                    dropArmorSystem(0)
+                }
+            }
+            if (sprites.readDataNumber(sprite, "col") == 0 && sprites.readDataNumber(sprite, "row") == 2 || sprites.readDataNumber(sprite, "col") == 0 && sprites.readDataNumber(sprite, "row") == 8) {
+                if (Math.percentChance(10)) {
+                    dropArmorSystem(1)
+                }
+            }
+            if (sprites.readDataNumber(sprite, "col") == 0 && sprites.readDataNumber(sprite, "row") == 3 || sprites.readDataNumber(sprite, "col") == 0 && sprites.readDataNumber(sprite, "row") == 9) {
+                if (Math.percentChance(10)) {
+                    dropArmorSystem(2)
+                }
+            }
             timer.after(50, function () {
                 sprites.destroy(sprite, effects.ashes, 100)
                 info.changeScoreBy(10 * mobHealth[sprites.readDataNumber(sprite, "col")][sprites.readDataNumber(sprite, "row")])
@@ -5521,7 +5241,7 @@ function GameIntro () {
         levelBanner(1)
     }
     gamemodeSystem = 1
-    startsequence = true
+    runGame = true
     updateSaturationHealthDisplay()
     armorSystem()
     animation.runImageAnimation(
@@ -6541,35 +6261,6 @@ function loadSave (saveFile: number) {
     updateArmorSystem()
     updateSaturationHealthDisplay()
 }
-controller.B.onEvent(ControllerButtonEvent.Repeated, function () {
-    if (startsequence && (BossHammerUnlocked && !(mapActive))) {
-        if (!(tridentSequenceLockout) && (inair == 0 && canLeapingAttack && chargingLeap && (!(blocking) && !(aiming) && attack == 0))) {
-            LeapingCharge += 1
-            if (LeapingCharge == 5) {
-                animation.runImageAnimation(
-                xTear,
-                playerAnimations[0][8],
-                100,
-                true
-                )
-            } else if (LeapingCharge == 25) {
-                animation.runImageAnimation(
-                xTear,
-                playerAnimations[0][9],
-                100,
-                true
-                )
-            } else if (LeapingCharge == 70) {
-                animation.runImageAnimation(
-                xTear,
-                playerAnimations[0][10],
-                100,
-                true
-                )
-            }
-        }
-    }
-})
 function MobShootsArrow (MobShootingArrow: Sprite) {
     if (Math.percentChance(20)) {
         if (sprites.readDataNumber(MobShootingArrow, "Health") > 0) {
@@ -6710,7 +6401,7 @@ function MobShootsArrow (MobShootingArrow: Sprite) {
     }
 }
 sprites.onOverlap(SpriteKind.playerArrow, SpriteKind.mob, function (sprite, otherSprite) {
-    if (startsequence) {
+    if (runGame) {
         if (!(fireworkBowUpgrade)) {
             mobDamageProcessingSystem(arrowCharge * 1, otherSprite)
         } else {
@@ -6761,7 +6452,7 @@ sprites.onOverlap(SpriteKind.playerArrow, SpriteKind.mob, function (sprite, othe
     }
 })
 function updateSaturationHealthDisplay () {
-    if (startsequence) {
+    if (runGame) {
         if (saturation >= 20) {
             foodbar.setImage(img`
                 ffff...ffff...ffff...ffff...ffff...ffff...ffff...ffff...ffff...ffff....
@@ -8965,6 +8656,116 @@ function updateSaturationHealthDisplay () {
             `)
     }
 }
+controller.left.onEvent(ControllerButtonEvent.Repeated, function () {
+    if (runGame && !(mapActive)) {
+        if (!(tridentSequenceLockout) && (!(aiming) && attack == 0)) {
+            if (BedrockShield) {
+                blocking = true
+                shield.setImage(img`
+                    . . . . . . . . . . . . . . . . 
+                    . . . . 1 1 1 1 1 1 1 1 . . . . 
+                    . . . . 1 c c c b c b 1 . . . . 
+                    . . . . 1 b a f c a a 1 . . . . 
+                    . . . . 5 a b c c c c 5 . . . . 
+                    . . . . 5 c b b b b a 5 . . . . 
+                    . . . . 5 f c c c a b 5 . . . . 
+                    . . . . 5 b b a c b f 5 . . . . 
+                    . . . . 5 a a b b b b 5 . . . . 
+                    . . . . 5 b b c c c c 5 . . . . 
+                    . . . . 5 f b a a b c 5 . . . . 
+                    . . . . 5 c c c c c c 5 . . . . 
+                    . . . . 4 a b b c b b 4 . . . . 
+                    . . . . 4 f a c c a b 4 . . . . 
+                    . . . . 4 4 4 4 4 4 4 4 . . . . 
+                    . . . . . . . . . . . . . . . . 
+                    `)
+            } else {
+                if (shieldHP > 0) {
+                    blocking = true
+                    if (shieldHP <= 0) {
+                        blocking = false
+                    } else if (shieldHP < 80) {
+                        shield.setImage(img`
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . b b b b b b . . . . . 
+                            . . . . . b e f e e b . . . . . 
+                            . . . . . b e e f e b . . . . . 
+                            . . . . . b a f f a b . . . . . 
+                            . . . . . b f f e f b . . . . . 
+                            . . . . . b f f e e b . . . . . 
+                            . . . . . b a e f a b . . . . . 
+                            . . . . . b e f f f b . . . . . 
+                            . . . . . b f f e f b . . . . . 
+                            . . . . . b a e e a b . . . . . 
+                            . . . . . b e e f e b . . . . . 
+                            . . . . . b b b b b b . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            `)
+                    } else if (shieldHP < 175) {
+                        shield.setImage(img`
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . b b b b b b . . . . . 
+                            . . . . . b e f e e b . . . . . 
+                            . . . . . b e e e e b . . . . . 
+                            . . . . . b a e e a b . . . . . 
+                            . . . . . b e f e f b . . . . . 
+                            . . . . . b e e e e b . . . . . 
+                            . . . . . b a e e a b . . . . . 
+                            . . . . . b e f e e b . . . . . 
+                            . . . . . b f e e e b . . . . . 
+                            . . . . . b a e e a b . . . . . 
+                            . . . . . b e e f e b . . . . . 
+                            . . . . . b b b b b b . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            `)
+                    } else if (shieldHP < 360) {
+                        shield.setImage(img`
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . b b b b b b . . . . . 
+                            . . . . . b e f e e b . . . . . 
+                            . . . . . b e e e e b . . . . . 
+                            . . . . . b a e e a b . . . . . 
+                            . . . . . b e e e f b . . . . . 
+                            . . . . . b e e e e b . . . . . 
+                            . . . . . b a e e a b . . . . . 
+                            . . . . . b e f e e b . . . . . 
+                            . . . . . b e e e e b . . . . . 
+                            . . . . . b a e e a b . . . . . 
+                            . . . . . b e e f e b . . . . . 
+                            . . . . . b b b b b b . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            `)
+                    } else {
+                        shield.setImage(img`
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . b b b b b b . . . . . 
+                            . . . . . b e e e e b . . . . . 
+                            . . . . . b e e e e b . . . . . 
+                            . . . . . b a e e a b . . . . . 
+                            . . . . . b e e e e b . . . . . 
+                            . . . . . b e e e e b . . . . . 
+                            . . . . . b a e e a b . . . . . 
+                            . . . . . b e e e e b . . . . . 
+                            . . . . . b e e e e b . . . . . 
+                            . . . . . b a e e a b . . . . . 
+                            . . . . . b e e e e b . . . . . 
+                            . . . . . b b b b b b . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            . . . . . . . . . . . . . . . . 
+                            `)
+                    }
+                }
+            }
+        }
+    }
+})
 function specialLootRoll (Red: boolean) {
     if (Red) {
         LootChestSprite = sprites.create(LootChestFallingSprites[0], SpriteKind.noInteract)
@@ -9609,6 +9410,29 @@ function mobRunSkeleton (Skeleton: Sprite) {
         })
     })
 }
+controller.left.onEvent(ControllerButtonEvent.Pressed, function () {
+    if (runGame) {
+    	
+    } else {
+        if (mapActive) {
+            if (!(mapSelection <= 1)) {
+                mapSelection += -1
+                map()
+            }
+        }
+        if (saveMenu) {
+            if (saveSelection > 1) {
+                saveSelection += -1
+                saveSelectorSprite.x += -21
+                readSave()
+            } else {
+                saveSelection = 4
+                saveSelectorSprite.setPosition(152, 198)
+                readSave()
+            }
+        }
+    }
+})
 function beamDebris (beam: Sprite) {
     debris = sprites.create(debrisArray._pickRandom(), SpriteKind.debris)
     debris.setVelocity(100, -100)
@@ -9969,6 +9793,35 @@ function Detonate (x: number, y: number, ExplosionPower: number) {
     ExplosionSprite.scale = ExplosionPower
     ExplosionSprite.bottom = y
 }
+controller.B.onEvent(ControllerButtonEvent.Repeated, function () {
+    if (runGame && (BossHammerUnlocked && !(mapActive))) {
+        if (!(tridentSequenceLockout) && (inair == 0 && canLeapingAttack && chargingLeap && (!(blocking) && !(aiming) && attack == 0))) {
+            LeapingCharge += 1
+            if (LeapingCharge == 5) {
+                animation.runImageAnimation(
+                xTear,
+                playerAnimations[0][8],
+                100,
+                true
+                )
+            } else if (LeapingCharge == 25) {
+                animation.runImageAnimation(
+                xTear,
+                playerAnimations[0][9],
+                100,
+                true
+                )
+            } else if (LeapingCharge == 70) {
+                animation.runImageAnimation(
+                xTear,
+                playerAnimations[0][10],
+                100,
+                true
+                )
+            }
+        }
+    }
+})
 function mobRunBlaze (Blaze: Sprite) {
     timer.after(randint(200, 500), function () {
         Blaze.vx = randint(-50, 10)
@@ -10029,37 +9882,37 @@ function map () {
         ................................................................................................................................................................
         ................................................................................................................................................................
         ................................................................................................................................................................
-        ................................................................................................................................................................
-        ................................................................................................................................................................
-        ................................................................................................................................................................
-        ..........eeeeeeeeeeeeee...........................eeeeeeeeeeeeee........eeeee....eeeeeeeeeeeeeeeeeeeeeeee................eeeee.....eeeeeee.......eeee..........
-        ..........eeeeeeeeeeeeeeeeee..............eeeee....eeeeeeeeeeeeeeeee.....eeeee..eeeeeeeeeeeeeeeeeeeeeeeeee......eeeeeeeeeeeeeee.....eeeeeeeeeeeeeeeeee..........
-        ..........eeeeeeeeeeeeeeeeee.eeeeeeeeee...eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee..eeeeeeeeeeeeeeeeee..eeeeeeeeeeeeeeeeee..........
-        ..........eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeedddddddeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee..........
-        ..........eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeddddddeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeddddddddeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee........
-        ..........eeeeeeeeeeeeeeeeeeeeeeeddddddeeeeeeeeeeeedddddddddddddddddeeeeeeeeeeeeeeeeeeeeeeeedddddddddddddeeeeeeeeeeeeeeddddddeeeeeeeeeeddddddddddeeeeeee........
-        ..........eeeeeeedddddddeedddddddddddddddeedddddddedddddddddddddddddddddeeeeeeeeeeeddddddddddddddddddddddddddddddddedddddddddddeeeeeeeeddddddddddddeeeee........
-        ..........eeeeeeeddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddeeedddddddddddddddddddddddddddddddddedddddddddddeeeeedddddddddddddddeeeee........
-        ..........eeeeeedddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddeeeee........
-        ..........eeeeeeddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddaaaaaadddddddddddddddddddddddddddddddddddddddddddddddddddeeeee........
-        .............eeedddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddaaaaaddaaaaaaaaaaaaadddddddddaaddddaaaaaadddddddddddddddddddddddddddddeeeee........
-        .............eeeddddddddddddddddddddddddddddaaaaaaaadddddddddddddddddaaaaaaaaaaaaaaaaaaaaaaabbbbbbbbbbbaaaaaaaaaaaaaaaaaaddddddddaaaaaaaaddddddddddeeeee........
-        .............eeedddddddddaaaaaaaaaaaaddaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabbbbbbbbbbbbbbbbbaaaaaaaaaaaaaaaaaaaaaaaaaaaadddddddddeeeee........
-        .............eeedddddddddaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaabbbbbbbbbbbbbbbbbbbaaaaaaaaaaaaaaaaaaaaaaaaadddddddddeeeee........
-        .............eeedddddddddaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabbbaaaaaaa1abaa2aaaaaaaa1bbbbabbbbbbbbbbbbbbbbbbbaaabbbbbbbbbbaaaaaaaddddddddee...........
-        ..........eeeeeedddddd11aaaaaaaaaaaaaaaaaaaaabbbbbbbbaaafaababbb6aaabbbbbaaaaa11111b6a11aaa11111bb2aaabbbbbbbbbbbbbbbbbaaaaabbbbbbbbbaaaaaaaddddddeee...........
-        ..........eeeeeedddddd111aaaaaaaaaaaaabffafbbbbbbb1bbbafabbbbb1111111bb1bbaa1111111bb11111111111bba2aaa11bbbbbbbbbbbbabbbaabbb9abbbbbbbaaaaaddddddeee...........
-        ..........eeeeeedddddd1111aaabbbabbbbbbaafbbbbb1111bbbbbbbe1111fffff1111bba11fffff11b111111111111b1aaa111bb5bbbbbabaaa1abbbbb9aa9aabbbbbbaaaddddddeee...........
-        ..........eeeeeeeddddd11111aab1abb111111111111111111bbb111e111ffbbbff111bba1ffbfbff111111fffff111111111111bb4bbbaa11a111abbbba1aaaa1bbbbbaaaaddddeeee...........
-        ............eeeeeddddd11111abb1111111fffff1111111111111111e111ffffbff1111b11ffbfbff11111ffbbbff111111111111bbbbaa111111111bba1111a11bbbbbbaaaddddeeeeeee........
-        ............eeeeedddddd1111ab1111111fffbfff1111111fffff1111111ffbbfff1111b11ffbbbff11111ffbffff11111111111111aa111111111111b111111111babbbaaaddddeeeeeee........
-        ............eeeeeeddddd1111111111111ffbbfff111111fffbfff111111ffffbff1111111ffffbff11111ffbbbff1111111111111111111fffff111111111111111aabbab1ddddeeeeeee........
-        ............eeeeeeddddd1111111111111fffbfff111111ffbfbff111111ffbbbff1111111ffffbff11111ffffbff11111fffff11111111ffbbbff111111fffff1111abbbb1ddddeeeeee.........
+        .....4445554454.......5555555...................................................................................................................................
+        .....44455544544.....544444445..................................................................................................................................
+        .....444555555444...54455554445.................................................................................................................................
+        .....4444444444444..54454445445.......................eeeeeeeeeeeeeeeeeeeeeeee....eeeee........eeeeeeeeeeeeee...................................................
+        .....4444444444444..54455554445......eeeeeeeeeee......eeeeeeeeeeeeeeeeeeeeeeeeee..eeeee.....eeeeeeeeeeeeeeeee....eeeee..............eeeeeeeeeeeeeeeeee..........
+        .....4455555555544..54454445445......eeeeeeeeeee..eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee...eeeeeeeeee.eeeeeeeeeeeeeeeeee..........
+        .....4454444444544..54454445445..eeeeeeeeeeeeeeeeeeeeeeedddddddeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee..........
+        .....4455555555544..54455554445..eeeeeeeeeeeeeeeeeeeeeeddddddddeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeddddddeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee..........
+        .....4454444444544...544444445...eeeeeeeeeeeeeeeeeeeeeedddddddddddddeeeeeeeeeeeeeeeeeeeeeeeedddddddddddddddddeeeeeeeeeeeeddddddeeeeeeeeeeeeeeeeeeeeeee..........
+        .....445555555554.....5555555...eeeeeeddeeeeeeedddeddddddddddddddddddddddddddeeeeeeeeeeedddddddddddddddddddddedddddddeedddddddddddddddeeeeeeeeeeeeeeee..........
+        ...............................eeeeeeddddddeeeedddddddddddddddddddddddddddddddeeedddddddddddddddddddddddddddddddddddddddddddddddddddddddddddeeeeeeeeee..........
+        ..............eeeeeeeeeeeeeeeeeeeeeedddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddeeeeeeeee..........
+        .............eeeeeeeeeeeeeeeeeeeeeddddddddddddddddddddddddddddddaaaaaaddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddeeeeeeee..........
+        .............eeeeeeeeeddddddddddddddddddddaaaaaaddddaadddddddddaaaaaaaaaaaaaddaaaaaddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddeeee.............
+        .............eeeddddddddddddddddddddddddddddaaaaaaaadddddddddddddddddaaaaaaaaaaaaaaaaaaaaaaabbbbbbbbbbbaaaaaaaaaaaaaaaaaaddddddddaaaaaaaaddddddeeeeeeee.........
+        .............eeedddddddddaaaaaaaaaaaaddaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabbbbbbbbbbbbbbbbbaaaaaaaaaaaaaaaaaaaaaaaaaaaadddddeeeeeeee.........
+        .............eeedddddddddaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaabbbbbbbbbbbbbbbbbbbaaaaaaaaaaaaaaaaaaaaaaaaaddddddeeeeee..........
+        .............eeedddddddddaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabbbaaaaaaa1abaa2aaaaaaaa1bbbbabbbbbbbbbbbbbbbbbbbaaabbbbbbbbbbaaaaaaadddddeeeeee..........
+        ..........eeeeeedddddd11aaaaaaaaaaaaaaaaaaaaabbbbbbbbaaafaababbb6aaabbbbbaaaaa11111b6a11aaa11111bb2aaabbbbbbbbbbbbbbbbbaaaaabbbbbbbbbaaaaaaadddddeeeee..........
+        ..........eeeeeedddddd111aaaaaaaaaaaaabffafbbbbbbb1bbbafabbbbb1111111bb1bbaa1111111bb11111111111bba2aaa11bbbbbbbbbbbbabbbaabbb9abbbbbbbaaaaaddddeeeee...........
+        ..........eeeeeedddddd1111aaabbbabbbbbbaafbbbbb1111bbbbbbbe1111fffff1111bba11fffff11b111111111111b1aaa111bb5bbbbbabaaa1abbbbb9aa9aabbbbbbaaaddddeeeeee..........
+        ..........eeeeeeeddddd11111aab1abb111111111111111111bbb111e111ffbbbff111bba1ffbfbff111111fffff111111111111bb4bbbaa11a111abbbba1aaaa1bbbbbaaaadddeeeeeee.........
+        ............eeeeeddddd11111abb1111111fffff1111111111111111e111ffffbff1111b11ffbfbff11111ffbbbff111111111111bbbbaa111111111bba1111a11bbbbbbaaadddeeeeeeee........
+        ............eeeeedddddd1111ab1111111fffbfff1111111fffff1111111ffbbfff1111b11ffbbbff11111ffbffff11111111111111aa111111111111b111111111babbbaaadddeeeeeeee........
+        ............eeeeeeddddd1111111111111ffbbfff111111fffbfff111111ffffbff1111111ffffbff11111ffbbbff1111111111111111111fffff111111111111111aabbab1dddeeeeeeee........
+        ............eeeeeeddddd1111111111111fffbfff111111ffbfbff111111ffbbbff1111111ffffbff11111ffffbff11111fffff11111111ffbbbff111111fffff1111abbbb1dddeeeeeee.........
         .............eeeeeddddd1111111111111fffbfff111111ffffbff1111111fffff11aa11111fffff11b111ffbbfff1111ffbbbff1111111ffffbff11111ffbbbff111aabbb1ddddeeeee..........
         .............eeeeeedddd1111111111111ffbbbff111111fffbfff1111111111111aaaaa111111111bbbb11fffff11111ffbffff1111111ffffbff11111ffbfbff11ffffb11ddddeeeee..........
-        .............eeeeeedddd11111111111111fffff1111111ffbbbff1111111111abbaaaaaa11111bbbbbbbb11111111111ffbbbff1111111ffffbff11111ffbbbff11f97fb11ddddeee............
-        .............eeeeeedddd111111bbb111111111111111111fffff111b1111aabbbbaaaaaa111bbbbbbbbbbbb1bb111111ffbfbff1111111ffffbff11111ffbfbff11f79fbb1ddddeee............
-        .............eeeeeedddd11111bbfbbbbeeeeeeeeeeeee11111111bbbaabbbbbbbaaaaaa6a1bbbbbaaaaabbbbbbb11111ffbbbff11ba1111fffff111111ffbbbff11f97fbb1ddddeee............
+        .............eeeeeedddd11111111111111fffff1111111ffbbbff1111111111abbaaaaaa11111bbbbbbbb11111111111ffbbbff1111111ffffbff11111ffbbbff11f97fb11ddddeeee...........
+        .............eeeeeedddd111111bbb111111111111111111fffff111b1111aabbbbaaaaaa111bbbbbbbbbbbb1bb111111ffbfbff1111111ffffbff11111ffbfbff11f79fbb1ddddeeee...........
+        .............eeeeeedddd11111bbfbbbbeeeeeeeeeeeee11111111bbbaabbbbbbbaaaaaa6a1bbbbbaaaaabbbbbbb11111ffbbbff11ba1111fffff111111ffbbbff11f97fbb1ddddeeee...........
         ..........eeeeeeeeeddddd111bbaafaabbbbbbbbe11ebbbbaa1111bbbbbbbbbbaaaaaaaaaabbbaaaaaaaaabbbbabaeee11fffff11bbaa111111111111111fffff111ffffdb1ddddeee............
         ..........eeeeeeeeeddddd111baaaaaaaaaa111bbbbbbbbbaaa1bbbbbbbaaaaaaaaaaaaaa6aaaaaaaaaaaaabbbaaaae111111111bbaaa1111111111111111111111bbbbbba1ddddeee............
         ..........eeeddddddddddd11baaaaaaaaaaaaa1bbbbbbbaaaaaafbbbaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabbaaaae11111111bbbaaaaeeeeeeee11111111111bbbbbaaa11ddddeee............
@@ -10115,25 +9968,25 @@ function map () {
         ..............eeedddddddd11111c11cc11cfff1111111111aaaaaaaaaaaaaaaaaaaaaaacccab111111111bacccaaaaaaaaaaaaaaaaaaa111111111111111aacfaaaaff1111dddddeeee..........
         ..............eeedddddddd11111ccccccccfff11111111111111111aaaadddaaaaaaaaacccabbbbbbbbbbbacccaaaaaaaaaaaaaaadddd111111111111111ccccccccffccfcccfddeeeee.........
         ..............eeeddddddddd1111ff1111cffff11111111111111ddddddddddddaaaaaaacccaaaaaaaaaaaaacccaaaaaaaaaaddddddddddd11ddd11111111aaaaccaaffacfaaafdddeeee.........
-        ..............eeedddddddddd111fffffffffff11111111ddddddddddddddddddddddaaaaaaaabbbbbbbbbaaaaaaaaaaaadddddddddddddddddddcccfcccfcffccffaffccccccfdddeeee.........
-        ...........eeeeeeddddddfffd1eeeedddddeeeeee11111ddddddddddddddddddddddddddaaaaaaaaaaaaaaaaaaaadddddddddddddddddddddddddaacfaaafaaccccca888fcffafddddeee.........
-        ...........eeeeeeddddddfafd1edddedddedddeee11dddddddddddddddddddddddddddddddddaaabbbbbbaaddddddddddddddddddddddddddddddcccccccfccffffa8118ccccafddddeee.........
-        ...........eeeeedddddddfffd1edeeeeeeeeedeee11dddddddddddddddddddddddddddddddddddaaaaaaaadddddddddddddddddddddddddddddddcffcffafaccaaa81798fffaafdddddeee........
-        ...........eeeeeddddddddddd1ede1111111edeee11ddddddddddddddddddddddddddddeeeeeeddddddddddddddddddddddddddddddddddddddddaaccccafbbbab81798baddddddddddeee........
-        ..........eeeeeeddddddddddd1dee1613191eedee11dddddddddddddddddddddddeeeeeeeeeeeeeddddddeeeeddddddddddddddddddddddddddddccfffaa88bbb81798bbdddddddddddeee........
-        ..........eeeeeddddddddfffd1dde1111111eddee11ddddddddddddeeeeeeeedddeeeeeeeeeeeeeeedddeeeeeeeeedddddddddddddddddddddddddddabab818b81798bbbbddeeddddddee.........
-        ..........eeeeeddddddddfafd1dde1414151eddee11dddddddddeeeeeeeeeeeeeeeecccbbbccbceeeeeee9999999eeeedddddddddddddddddddddeedbbbbb8181798bbbbbdeeeedddddee.........
-        ..........eeeeeddddddddfffd1dde1111111eddee11dddddddeeeeeeeeeeeeeeeeeecccbbbccbcceeeee988888889eeeeeeeeeeeeeeddddddddddeeddbbbb817898bbbbbddeeeeeeeeeee.........
-        ..........eeeeeeeeddddddddd1dee1213121eedee1dddddddeeeeeeeeeeeeeeeeeeecccbbbbbbccceee98899998889eeeeeeeeeeeeeeeeeedddddeeedbbbbb8178bbbbbdddeeeeeeeeeee.........
-        ..........eeeeeeeeedddddddd1ede1111111edeee1dddeeeeeeeeee..eeeeeeeeeeecccccccccccccee98898889889eeeeeeeeeeeeeeeeeeeeeeeeeedbbbb8e8998bbbdddee.eeeeeeeee.........
-        ..........eeeeeeeeeedddfffd1edeeeeeeeeedeee1ddeeeeeeeeeee.....eeeeeeeecccccccccccccee98899998889eeeeeeeeeeeeeeeeeeeeeeeeeedddb8e8b8898bbbddde..eeeeeeee.........
-        ..........eee...eeeeeddfafd1edddedddedddeee11ddeeeeeeee.........e.eeeeccbbbbbbbbbccee98898889889eeeeeeeeeee.........eeeeeeed8888bbbb88bbbddee.....eeeee.........
-        ....................eddfffd1eeeedddddeeeeee1ddee..................eeeeccbcccccccbccee98898889889eeeeeeeee................edd818bbbdbbbbbdddee...................
-        ....................edddddd11111111111111111ddee...................eeeccbbbbbbbbbccee98899998889eeeeeee..................eed888ddddddddddddee...................
-        ....................edddddddddddddddddddddddddde...................eeeccbcccccccbcceee988888889eeeeeee...................eedddddeddddeeeeddee...................
-        ....................eeeddddeddddddddddedddddeee....................eeeccbbbbbbbbbcceeee9999999eeeeeee.....................eeeeeeeeeeeeeeeeee....................
-        .....................eeeeeeeeeeeeeeeeeeeeeeeee......................eeeeeeeeeeeeeeeeeeeeeeeeeeeeee..............................................................
-        ....................................................................ee................eeee...e..................................................................
+        ..............eeedddddddddd111fffffffffff11111111dddddddddddddddddddddeaaaaaaaabbbbbbbbbaaaaaaaaaaaadddddddddddddddddddcccfcccfcffccffaffccccccfdddeeee.........
+        ...........eeeeeeddddddfffd1eeeedddddeeeeee11111dddddddddddddddddddddeeeeeaaaaaaaaaaaaaaaaaaaaeedddddddddddddddddddddddaacfaaafaaccccca888fcffafddddeee.........
+        ...........eeeeeeddddddfafd1edddedddedddeee11ddddddddddddddddddddddeeeeeeeeeeeaaabbbbbbaaeeeeeeeeddddddddddddddddddddddcccccccfccffffa8118ccccafddddeee.........
+        ...........eeeeedddddddfffd1edeeeeeeeeedeee11ddddddddddddddddddddddeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeddddddddddddddddddddcffcffafaccaaa81798fffaafdddddeee........
+        ...........eeeeeddddddddddd1ede1111111edeee11ddddddddddddddddddddeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeedddddddddddddddddddaaccccafbbbab81798baddddddddddeee........
+        ..........eeeeeeddddddddddd1dee1613191eedee11dddddddddddddddddeeeeeeeefffefefefffeeefffffefffefffeeeeeeeeddddddddddddddccfffaa88bbb81798bbdddddddddddeee........
+        ..........eeeeeddddddddfffd1dde1111111eddee11ddddddddddddeeeeeeeeeeeeeefeefefefeeeeefefefefefefefeeeeeeeedddddddddddddddddabab818b81798bbbbddeeddddddee.........
+        ..........eeeeeddddddddfafd1dde1414151eddee11dddddddddeeeeeeeeeeeeeeeeefeefffeffeeeefefefefffefffeeeeeeeeeeddddddddddddeedbbbbb8181798bbbbbdeeeedddddee.........
+        ..........eeeeeddddddddfffd1dde1111111eddee11dddddddeeeeeeeeeeeeeeeeeeefeefefefeeeeefefefefefefeeeeeeeeeeeeeeedddddddddeeddbbbb817898bbbbbddeeeeeeeeeee.........
+        ..........eeeeeeeeddddddddd1dee1213121eedee1dddddddeeeeeeeeeeeeeeeeeeeefeefefefffeeefefefefefefeeeeeeeeeeeeeeeeeeedddddeeedbbbbb8178bbbbbdddeeeeeeeeeee.........
+        ..........eeeeeeeeedddddddd1ede1111111edeee1dddeeeeeeeeee..eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeedbbbb8e8998bbbdddee.eeeeeeeee.........
+        ..........eeeeeeeeeedddfffd1edeeeeeeeeedeee1ddeeeeee...ee........eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeedddb8e8b8898bbbddde..eeeeeeee.........
+        ..........eee...eeeeeddfafd1edddedddedddeee11ddeeeee..............eeeeeeeeeeeeeeee...eeeeeeee.....eee...eee.........eeeeeeed8888bbbb88bbbddee.....eeeee.........
+        ....................eddfffd1eeeedddddeeeeee1ddee.........................eeeeeeeee.......................................edd818bbbdbbbbbdddee...................
+        ....................edddddd11111111111111111ddee.........................................................................eed888ddddddddddddee...................
+        ....................eeedeeeddddddddddddddddddeee.........................................................................eedddddeddddeeeeddee...................
+        .....................eeee.eeeeeeeeeeeeeeeeeeee............................................................................eeeeeeeeeeeeeeeeee....................
+        ................................................................................................................................................................
+        ................................................................................................................................................................
         ................................................................................................................................................................
         ................................................................................................................................................................
         ................................................................................................................................................................
@@ -10145,7 +9998,8 @@ function map () {
         `
     levelMapSprite = sprites.create(levelMap, SpriteKind.noInteract)
     mapActive = true
-    startsequence = false
+    runGame = false
+    mapSelection = 1
     if (levelUnlocked >= 1) {
         for (let mapX = 0; mapX <= 6; mapX++) {
             for (let mapY = 0; mapY <= 6; mapY++) {
@@ -25259,9 +25113,7 @@ scene.onHitWall(SpriteKind.mob, function (sprite, location) {
     MobsMissed += 1
 })
 function NextLevel (Level: number) {
-    let Experience = 0
     if (Level == 1) {
-        levelBanner(Level)
         timer.after(6500, function () {
             spawnMob(0, 1)
             timer.after(3000, function () {
@@ -25273,13 +25125,7 @@ function NextLevel (Level: number) {
                         timer.after(3000, function () {
                             spawnMob(0, 3)
                             timer.after(6000, function () {
-                                splashLevelStats(MobsKilledLevel, Experience, ArmorFoundLevel)
-                                timer.after(10000, function () {
-                                    specialLootRoll(false)
-                                    timer.after(13500, function () {
-                                        map()
-                                    })
-                                })
+                                playingLevel = false
                             })
                         })
                     })
@@ -25570,228 +25416,6 @@ function armoredGhastTripleBlast (GhastInQuestion: Sprite) {
         })
     }
 }
-controller.down.onEvent(ControllerButtonEvent.Pressed, function () {
-    if (startsequence && !(mapActive)) {
-        if (!(tridentSequenceLockout) && !(aiming) && (attack == 0 && !(blocking)) && bowUnlocked) {
-            aiming = true
-            arrowCharge = 0
-            playerBow = sprites.create(img`
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                `, SpriteKind.playerBow)
-            chargeDot = sprites.create(img`
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                `, SpriteKind.scope)
-            if (!(fireworkBowUpgrade)) {
-                animation.runImageAnimation(
-                playerBow,
-                [img`
-                    . . . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . . . 
-                    . . . . . d d d . . . . . . . . . . 
-                    . . . . f . . d d . . . . . . . . . 
-                    . . . . f . . . d . . . . . . . . . 
-                    . . . f . . . . . d 1 . . . . . . . 
-                    . . . f . . . e e d 1 1 . . . . . . 
-                    . . . 1 1 e e . . d 1 . . . . . . . 
-                    . . 1 1 . . . . . d . . . . . . . . 
-                    . . . . f . . . d . . . . . . . . . 
-                    . . . . f . . d d . . . . . . . . . 
-                    . . . . . d d d . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . . . 
-                    `,img`
-                    . . . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . . . 
-                    . . . . . d d d . . . . . . . . . . 
-                    . . . . f . . d d . . . . . . . . . 
-                    . . . . f . . . d . . . . . . . . . 
-                    . . . f . . . . . d 1 . . . . . . . 
-                    . . . f . . . e e d 1 1 . . . . . . 
-                    . . . 1 1 e e . . d 1 . . . . . . . 
-                    . . 1 1 . . . . . d . . . . . . . . 
-                    . . . . f . . . d . . . . . . . . . 
-                    . . . . f . . d d . . . . . . . . . 
-                    . . . . . d d d . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . . . 
-                    `,img`
-                    . . . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . . . 
-                    . . . . . d d d . . . . . . . . . . 
-                    . . . . f . . d d . . . . . . . . . 
-                    . . . f . . . . d . . . . . . . . . 
-                    . . f . . . . . . d 1 . . . . . . . 
-                    . f . . . . e e e d 1 1 . . . . . . 
-                    . 1 1 e e e . . . d 1 . . . . . . . 
-                    1 1 f . . . . . . d . . . . . . . . 
-                    . . . f . . . . d . . . . . . . . . 
-                    . . . . f . . d d . . . . . . . . . 
-                    . . . . . d d d . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . . . 
-                    `,img`
-                    . . . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . . . 
-                    . . . . d d d . . . . . . . . . . . 
-                    . . . f . . . d . . . . . . . . . . 
-                    . . f . . . . . d . . . . . . . . . 
-                    . f . . . . . . . 1 1 . . . . . . . 
-                    f . . . . . e e e d 1 1 . . . . . . 
-                    f 1 1 e e e . . . 1 1 . . . . . . . 
-                    1 1 . . . . . . . d . . . . . . . . 
-                    . f f . . . . . d . . . . . . . . . 
-                    . . . f . . . d d . . . . . . . . . 
-                    . . . . d d d . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . . . 
-                    `],
-                400,
-                false
-                )
-            } else {
-                animation.runImageAnimation(
-                playerBow,
-                [img`
-                    . . . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . . . 
-                    . . . . . . f e e . . . . . . . . . 
-                    . . . . . . e f d e e . . . . . . . 
-                    . . . . . . . f . d d e . 1 2 . . . 
-                    c c c . c a f 1 2 2 1 2 c 1 2 2 . . 
-                    c e c e c d e f 2 1 2 2 c 1 2 2 2 . 
-                    c e e e e d . f 1 2 2 e e 1 2 2 . . 
-                    . . . . d b . f . e e d e 1 2 . . . 
-                    . . . . d . f e e d d d . . . . . . 
-                    . . . . . . e d d d . . . . . . . . 
-                    . . . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . . . 
-                    `,img`
-                    . . . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . . . 
-                    . . . . . . f e e . . . . . . . . . 
-                    . . . . . . f d d e e . . . . . . . 
-                    . . . . . . f . . d d e . 1 2 . . . 
-                    c c c . c f a 1 2 2 1 2 c 1 2 2 . . 
-                    c e c e c d f 2 2 1 2 2 c 1 2 2 2 . 
-                    c e e e e d f 2 1 2 2 e e 1 2 2 . . 
-                    . . . . d b f . . e e d e 1 2 . . . 
-                    . . . . d . f e e d d d . . . . . . 
-                    . . . . . . e d d d . . . . . . . . 
-                    . . . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . . . 
-                    `,img`
-                    . . . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . . . 
-                    . . . . . . f e e . . . . . . . . . 
-                    . . . . . f e d d e e . . . . . . . 
-                    . . . . . f . . . d d e . 1 2 . . . 
-                    c c c . c a a 1 2 2 1 2 c 1 2 2 . . 
-                    c e c e f d e 2 2 1 2 2 c 1 2 2 2 . 
-                    c e e e e f e 2 1 2 2 e e 1 2 2 . . 
-                    . . . . d f . . . e e d e 1 2 . . . 
-                    . . . . d . f e e d d d . . . . . . 
-                    . . . . . . e d d d . . . . . . . . 
-                    . . . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . . . 
-                    `,img`
-                    . . . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . . . 
-                    . . . . . . f e e . . . . . . . . . 
-                    . . . . . f e d d e e . . . . . . . 
-                    . . . . f . . . . d d e . 1 2 . . . 
-                    c c c f c a a 1 2 2 1 2 c 1 2 2 . . 
-                    c e c f c d e 2 2 1 2 2 c 1 2 2 2 . 
-                    c e e e f d e 2 1 2 2 e e 1 2 2 . . 
-                    . . . . d f . . . e e d e 1 2 . . . 
-                    . . . . d . f e e d d d . . . . . . 
-                    . . . . . . e d d d . . . . . . . . 
-                    . . . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . . . 
-                    `],
-                400,
-                false
-                )
-            }
-            defaultAnimatePlayer()
-            playerBow.z = 10
-            playerBow.setPosition(xTear.x + 4, xTear.y)
-            chargeDot.setPosition(xTear.x, xTear.y)
-            if (upButtonPressed) {
-                angle = Math.min(angle + 2, 10)
-            } else {
-                angle = Math.max(0, angle - scopePull)
-            }
-            endX = xTear.x + radius * Math.cos(angle * 3.1415927 / 180)
-            endY = xTear.y - radius * Math.sin(angle * 3.1415927 / 180)
-            chargeDot.setPosition(endX, endY)
-        }
-    } else {
-        if (saveMenu) {
-            if (saveSelection == 6) {
-                saveSelection = 1
-                readSave()
-                saveSelectorSprite.setPosition(89, 198)
-            } else {
-                saveSelection = 5
-                saveSelectorSprite.setPosition(89, 219)
-                timer.background(function () {
-                    story.clearAllText()
-                    story.spriteSayText(saveSelectorSprite, "Clear ALL save data?", 1, 2, story.TextSpeed.VeryFast)
-                })
-            }
-        }
-    }
-})
 function OverworldBackgroundSequence () {
     palette2(0)
     sprites.destroyAllSpritesOfKind(SpriteKind.Caves)
@@ -26568,7 +26192,7 @@ function OverworldBackgroundSequence () {
     }
 }
 controller.right.onEvent(ControllerButtonEvent.Pressed, function () {
-    if (startsequence) {
+    if (runGame) {
         if (!(tridentSequenceLockout) && (!(aiming) && !(blocking))) {
             if (attack == 0) {
                 attack = 1
@@ -26855,7 +26479,18 @@ function readSave () {
         if (blockSettings.readString("" + saveSelection + "name").isEmpty()) {
             timer.background(function () {
                 story.clearAllText()
-                story.spriteSayText(saveSelectorSprite, "null", 2, 1)
+                if (saveSelection == 1) {
+                    story.spriteSayText(saveSelectorSprite, "Steve (Save 1)", 2, 1, story.TextSpeed.Fast)
+                }
+                if (saveSelection == 2) {
+                    story.spriteSayText(saveSelectorSprite, "Alex (Save 2)", 2, 1, story.TextSpeed.Fast)
+                }
+                if (saveSelection == 3) {
+                    story.spriteSayText(saveSelectorSprite, "xTear (Save 3)", 2, 1, story.TextSpeed.Fast)
+                }
+                if (saveSelection == 4) {
+                    story.spriteSayText(saveSelectorSprite, "Technoblade (Save 4)", 2, 1, story.TextSpeed.Fast)
+                }
             })
         } else {
             timer.background(function () {
@@ -26883,9 +26518,118 @@ sprites.onOverlap(SpriteKind.playerArrow, SpriteKind.Fireball, function (sprite,
         sprites.setDataBoolean(otherSprite, "ReturningFireball", true)
     }
 })
-controller.menu.onEvent(ControllerButtonEvent.Pressed, function () {
-    if (skipIntro) {
-        map()
+controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
+    if (runGame) {
+        chargingLeap = false
+        LeapingCharge = 0
+        if (angle < 15) {
+            angle += 15
+        }
+        if (inair == 0 && !(jumpLock) && !(tridentSequenceLockout)) {
+            inair = 1
+            xTear.vy = -115
+            if (DiamondSet == 4) {
+                animation.runImageAnimation(
+                xTear,
+                playerAnimations[3][2],
+                1000,
+                false
+                )
+            } else if (IronSet == 4) {
+                animation.runImageAnimation(
+                xTear,
+                playerAnimations[2][2],
+                1000,
+                false
+                )
+            } else if (GoldSet == 4) {
+                animation.runImageAnimation(
+                xTear,
+                playerAnimations[1][2],
+                1000,
+                false
+                )
+            } else {
+                animation.runImageAnimation(
+                xTear,
+                playerAnimations[0][2],
+                1000,
+                false
+                )
+            }
+            timer.after(500, function () {
+                if (!(aiming)) {
+                    defaultAnimatePlayer()
+                } else {
+                    if (diamondSword) {
+                        animation.runImageAnimation(
+                        xTear,
+                        playerAnimations[3][4],
+                        100,
+                        true
+                        )
+                    } else if (ironSword) {
+                        animation.runImageAnimation(
+                        xTear,
+                        playerAnimations[2][4],
+                        100,
+                        true
+                        )
+                    } else if (GoldSword) {
+                        animation.runImageAnimation(
+                        xTear,
+                        playerAnimations[1][4],
+                        100,
+                        true
+                        )
+                    } else {
+                        animation.runImageAnimation(
+                        xTear,
+                        playerAnimations[0][4],
+                        100,
+                        true
+                        )
+                    }
+                }
+            })
+        }
+    } else if (mapActive && !(saveMenu)) {
+        playLevel(mapSelection)
+    } else if (saveMenu) {
+        if (saveSelection == 6) {
+            openSaveMenu(false)
+        } else if (saveSelection == 5) {
+            if (deleteSystemTrip) {
+                timer.background(function () {
+                    deleteSystemTrip = false
+                    story.clearAllText()
+                    blockSettings.clear()
+                    story.spriteSayText(saveSelectorSprite, "all saves erased!", 6, 1, story.TextSpeed.VeryFast)
+                })
+            } else {
+                timer.background(function () {
+                    story.clearAllText()
+                    deleteSystemTrip = true
+                    story.spriteSayText(saveSelectorSprite, "confirm wipe ALL saves?", 4, 1, story.TextSpeed.VeryFast)
+                })
+            }
+        } else {
+            if (!(blockSettings.readString("" + saveSelection + "name").isEmpty())) {
+                openSaveMenu(false)
+                loadSave(saveSelection)
+                mapSelection = 1
+                map()
+            } else {
+                timer.background(function () {
+                    scene.cameraShake(2, 100)
+                    story.clearAllText()
+                    story.spriteSayText(saveSelectorSprite, "no file found", 2, 1)
+                })
+            }
+        }
+    } else {
+        effects.confetti.endScreenEffect()
+        GameIntro()
     }
 })
 sprites.onCreated(SpriteKind.mob, function (sprite) {
@@ -26912,6 +26656,62 @@ sprites.onCreated(SpriteKind.mob, function (sprite) {
             mobRunFlyingMachine(sprite)
         }
     })
+})
+controller.up.onEvent(ControllerButtonEvent.Pressed, function () {
+    if (runGame) {
+        if (!(mapActive)) {
+            upButtonPressed = true
+            if (TridentUnlocked && (!(TridentAttack) && (inair == 0 && canLeapingAttack && (!(blocking) && !(aiming) && attack == 0)))) {
+                holdingTrident = true
+                attack = 1
+                if (DiamondSet == 4) {
+                    animation.runImageAnimation(
+                    xTear,
+                    playerAnimations[3][11],
+                    100,
+                    true
+                    )
+                } else if (IronSet == 4) {
+                    animation.runImageAnimation(
+                    xTear,
+                    playerAnimations[2][11],
+                    100,
+                    true
+                    )
+                } else if (GoldSet == 4) {
+                    animation.runImageAnimation(
+                    xTear,
+                    playerAnimations[1][11],
+                    100,
+                    true
+                    )
+                } else {
+                    animation.runImageAnimation(
+                    xTear,
+                    playerAnimations[0][11],
+                    100,
+                    true
+                    )
+                }
+            }
+        }
+    } else {
+        if (saveMenu) {
+            if (saveSelection == 5) {
+                saveSelection = 1
+                saveSelectorSprite.setPosition(89, 198)
+                readSave()
+            } else {
+                saveSelection = 6
+                timer.background(function () {
+                    story.clearAllText()
+                    story.spriteSayText(saveSelectorSprite, "Close?", 1, 10, story.TextSpeed.VeryFast)
+                })
+                readSave()
+                saveSelectorSprite.setPosition(161, 177)
+            }
+        }
+    }
 })
 function waveAttack () {
     waveSprites = [[img`
@@ -28010,89 +27810,53 @@ function EndCrystal () {
     true
     )
 }
-controller.up.onEvent(ControllerButtonEvent.Released, function () {
-    if (startsequence && !(mapActive)) {
-        upButtonPressed = false
-        if (TridentUnlocked && (!(TridentAttack) && (inair == 0 && canLeapingAttack && (!(blocking) && !(aiming) && attack == 1)))) {
-            holdingTrident = false
-            tridentSequenceLockout = true
-            TridentAttack = true
-            invincibilityFrame = true
-            if (DiamondSet == 4) {
-                animation.runImageAnimation(
-                xTear,
-                playerAnimations[3][12],
-                100,
-                false
-                )
-            } else if (IronSet == 4) {
-                animation.runImageAnimation(
-                xTear,
-                playerAnimations[2][12],
-                100,
-                false
-                )
-            } else if (GoldSet == 4) {
-                animation.runImageAnimation(
-                xTear,
-                playerAnimations[1][12],
-                100,
-                false
-                )
-            } else {
-                animation.runImageAnimation(
-                xTear,
-                playerAnimations[0][12],
-                100,
-                false
-                )
+controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
+    if (runGame) {
+        if (BossHammerUnlocked) {
+            if (!(mapActive)) {
+                chargingLeap = true
+                LeapingCharge = 0
             }
-            timer.after(125, function () {
-                music.play(music.createSoundEffect(WaveShape.Noise, 64, 3217, 255, 0, 900, SoundExpressionEffect.None, InterpolationCurve.Linear), music.PlaybackMode.InBackground)
-            })
-            timer.after(300, function () {
-                waveAttack()
-                timer.after(75, function () {
-                    waveAttack()
-                    timer.after(75, function () {
-                        waveAttack()
-                        timer.after(75, function () {
-                            waveAttack()
-                            timer.after(75, function () {
-                                waveAttack()
-                                timer.after(75, function () {
-                                    waveAttack()
-                                    timer.after(75, function () {
-                                        waveAttack()
-                                        timer.after(250, function () {
-                                            xTear.setFlag(SpriteFlag.Invisible, true)
-                                            timer.after(20, function () {
-                                                xTear.setFlag(SpriteFlag.Invisible, false)
-                                                defaultAnimatePlayer()
-                                                invincibilityFrame = false
-                                                attack = 0
-                                                timer.after(100, function () {
-                                                    tridentSequenceLockout = false
-                                                })
-                                                timer.after(1200, function () {
-                                                    TridentAttack = false
-                                                })
-                                            })
-                                        })
-                                    })
-                                })
-                            })
-                        })
-                    })
+        }
+    } else {
+        if (!(saveMenu)) {
+            openSaveMenu(true)
+        } else {
+            if (saveSystemTrip) {
+                timer.background(function () {
+                    saveSystemTrip = false
+                    story.clearAllText()
+                    overwriteSave(saveSelection)
+                    story.spriteSayText(saveSelectorSprite, "complete!", 6, 1, story.TextSpeed.VeryFast)
                 })
-            })
+            } else {
+                timer.background(function () {
+                    story.clearAllText()
+                    saveSystemTrip = true
+                    story.spriteSayText(saveSelectorSprite, "overwrite file with current data?", 4, 1, story.TextSpeed.VeryFast)
+                })
+            }
         }
     }
 })
 function playLevel (mapSelection: number) {
     sprites.destroy(levelMapSprite, effects.disintegrate, 100)
     mapActive = false
+    runGame = true
+    playingLevel = true
+    updateArmorSystem()
+    levelBanner(mapSelection)
     NextLevel(mapSelection)
+    timer.background(function () {
+        pauseUntil(() => !(playingLevel))
+        splashLevelStats(MobsKilledLevel, Experience, ArmorFoundLevel)
+        timer.after(10000, function () {
+            specialLootRoll(false)
+            timer.after(13500, function () {
+                map()
+            })
+        })
+    })
 }
 function waitForPlay () {
     foodbar.setImage(img`
@@ -28539,6 +28303,85 @@ function waitForPlay () {
     true
     )
 }
+controller.up.onEvent(ControllerButtonEvent.Released, function () {
+    if (runGame && !(mapActive)) {
+        upButtonPressed = false
+        if (TridentUnlocked && (!(TridentAttack) && (inair == 0 && canLeapingAttack && (!(blocking) && !(aiming) && attack == 1)))) {
+            holdingTrident = false
+            tridentSequenceLockout = true
+            TridentAttack = true
+            invincibilityFrame = true
+            if (DiamondSet == 4) {
+                animation.runImageAnimation(
+                xTear,
+                playerAnimations[3][12],
+                100,
+                false
+                )
+            } else if (IronSet == 4) {
+                animation.runImageAnimation(
+                xTear,
+                playerAnimations[2][12],
+                100,
+                false
+                )
+            } else if (GoldSet == 4) {
+                animation.runImageAnimation(
+                xTear,
+                playerAnimations[1][12],
+                100,
+                false
+                )
+            } else {
+                animation.runImageAnimation(
+                xTear,
+                playerAnimations[0][12],
+                100,
+                false
+                )
+            }
+            timer.after(125, function () {
+                music.play(music.createSoundEffect(WaveShape.Noise, 64, 3217, 255, 0, 900, SoundExpressionEffect.None, InterpolationCurve.Linear), music.PlaybackMode.InBackground)
+            })
+            timer.after(300, function () {
+                waveAttack()
+                timer.after(75, function () {
+                    waveAttack()
+                    timer.after(75, function () {
+                        waveAttack()
+                        timer.after(75, function () {
+                            waveAttack()
+                            timer.after(75, function () {
+                                waveAttack()
+                                timer.after(75, function () {
+                                    waveAttack()
+                                    timer.after(75, function () {
+                                        waveAttack()
+                                        timer.after(250, function () {
+                                            xTear.setFlag(SpriteFlag.Invisible, true)
+                                            timer.after(20, function () {
+                                                xTear.setFlag(SpriteFlag.Invisible, false)
+                                                defaultAnimatePlayer()
+                                                invincibilityFrame = false
+                                                attack = 0
+                                                timer.after(100, function () {
+                                                    tridentSequenceLockout = false
+                                                })
+                                                timer.after(1200, function () {
+                                                    TridentAttack = false
+                                                })
+                                            })
+                                        })
+                                    })
+                                })
+                            })
+                        })
+                    })
+                })
+            })
+        }
+    }
+})
 function dropArmorSystem (_type: number) {
     showArmorHUD()
     timer.after(501, function () {
@@ -28843,116 +28686,6 @@ function dropArmorSystem (_type: number) {
         ArmorFoundLevel += 1
     }
 }
-controller.left.onEvent(ControllerButtonEvent.Repeated, function () {
-    if (startsequence && !(mapActive)) {
-        if (!(tridentSequenceLockout) && (!(aiming) && attack == 0)) {
-            if (BedrockShield) {
-                blocking = true
-                shield.setImage(img`
-                    . . . . . . . . . . . . . . . . 
-                    . . . . 1 1 1 1 1 1 1 1 . . . . 
-                    . . . . 1 c c c b c b 1 . . . . 
-                    . . . . 1 b a f c a a 1 . . . . 
-                    . . . . 5 a b c c c c 5 . . . . 
-                    . . . . 5 c b b b b a 5 . . . . 
-                    . . . . 5 f c c c a b 5 . . . . 
-                    . . . . 5 b b a c b f 5 . . . . 
-                    . . . . 5 a a b b b b 5 . . . . 
-                    . . . . 5 b b c c c c 5 . . . . 
-                    . . . . 5 f b a a b c 5 . . . . 
-                    . . . . 5 c c c c c c 5 . . . . 
-                    . . . . 4 a b b c b b 4 . . . . 
-                    . . . . 4 f a c c a b 4 . . . . 
-                    . . . . 4 4 4 4 4 4 4 4 . . . . 
-                    . . . . . . . . . . . . . . . . 
-                    `)
-            } else {
-                if (shieldHP > 0) {
-                    blocking = true
-                    if (shieldHP <= 0) {
-                        blocking = false
-                    } else if (shieldHP < 80) {
-                        shield.setImage(img`
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . b b b b b b . . . . . 
-                            . . . . . b e f e e b . . . . . 
-                            . . . . . b e e f e b . . . . . 
-                            . . . . . b a f f a b . . . . . 
-                            . . . . . b f f e f b . . . . . 
-                            . . . . . b f f e e b . . . . . 
-                            . . . . . b a e f a b . . . . . 
-                            . . . . . b e f f f b . . . . . 
-                            . . . . . b f f e f b . . . . . 
-                            . . . . . b a e e a b . . . . . 
-                            . . . . . b e e f e b . . . . . 
-                            . . . . . b b b b b b . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            `)
-                    } else if (shieldHP < 175) {
-                        shield.setImage(img`
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . b b b b b b . . . . . 
-                            . . . . . b e f e e b . . . . . 
-                            . . . . . b e e e e b . . . . . 
-                            . . . . . b a e e a b . . . . . 
-                            . . . . . b e f e f b . . . . . 
-                            . . . . . b e e e e b . . . . . 
-                            . . . . . b a e e a b . . . . . 
-                            . . . . . b e f e e b . . . . . 
-                            . . . . . b f e e e b . . . . . 
-                            . . . . . b a e e a b . . . . . 
-                            . . . . . b e e f e b . . . . . 
-                            . . . . . b b b b b b . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            `)
-                    } else if (shieldHP < 360) {
-                        shield.setImage(img`
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . b b b b b b . . . . . 
-                            . . . . . b e f e e b . . . . . 
-                            . . . . . b e e e e b . . . . . 
-                            . . . . . b a e e a b . . . . . 
-                            . . . . . b e e e f b . . . . . 
-                            . . . . . b e e e e b . . . . . 
-                            . . . . . b a e e a b . . . . . 
-                            . . . . . b e f e e b . . . . . 
-                            . . . . . b e e e e b . . . . . 
-                            . . . . . b a e e a b . . . . . 
-                            . . . . . b e e f e b . . . . . 
-                            . . . . . b b b b b b . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            `)
-                    } else {
-                        shield.setImage(img`
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . b b b b b b . . . . . 
-                            . . . . . b e e e e b . . . . . 
-                            . . . . . b e e e e b . . . . . 
-                            . . . . . b a e e a b . . . . . 
-                            . . . . . b e e e e b . . . . . 
-                            . . . . . b e e e e b . . . . . 
-                            . . . . . b a e e a b . . . . . 
-                            . . . . . b e e e e b . . . . . 
-                            . . . . . b e e e e b . . . . . 
-                            . . . . . b a e e a b . . . . . 
-                            . . . . . b e e e e b . . . . . 
-                            . . . . . b b b b b b . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            . . . . . . . . . . . . . . . . 
-                            `)
-                    }
-                }
-            }
-        }
-    }
-})
 function placeInnerTop (num: number) {
     lastCreatedTopInner = sprites.create(UpperCaveUnderlay._pickRandom(), SpriteKind.InnerTop)
     lastCreatedTopInner.setFlag(SpriteFlag.Ghost, true)
@@ -28970,21 +28703,21 @@ function openSaveMenu (open: boolean) {
             ccaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaacc
             caabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbaac
             cabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbac
-            cabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbcccccccbbac
-            cabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbcaaaaaaacbac
+            cabb111b111b1b1b111bbbb111b111b11111b111b111bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbcccccccbbac
+            cabb1bbb1b1b1b1b1bbbbbb1bbb1b1b1b1b1b1bbbbb1bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbcaaaaaaacbac
+            cabb111b1b1b1b1b111bbbb1b1b1b1b1b1b1b111bb11bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbcacaaacacbac
+            cabbbb1b111b1b1b1bbbbbb1b1b111b1b1b1b1bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbcaacacaacbac
+            cabb111b1b1bb1bb111bbbb111b1b1b1b1b1b111bb1bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbcaaacaaacbac
+            cabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbcaacacaacbac
             cabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbcacaaacacbac
-            cabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbcaacacaacbac
-            cabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbcaaacaaacbac
-            cabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbcaacacaacbac
-            cabbbbbbbbbbbbbbbbbbbbbbbbbbaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabbbbbbbbbbbbbbbbcacaaacacbac
-            cabbbbbbbbbbbbbbbbbbbbbbbbbaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabbbbbbbbbbbbbbbcaaaaaaacbac
-            cabbbbbbbbbbbbbbbbbbbbbbbbbaa6aaa666a666a66aaaaa666a666a6a6a666aa666abbbbbbbbbbbbbbbbcccccccbbac
-            cabbbbbbbbbbbbbbbbbbbbbbbbbaa6aaa6a6a6a6a6a6aaaa6aaa6a6a6a6a6aaaaaa6abbbbbbbbbbbbbbbbbbbbbbbbbac
-            cabbbbbbbbbbbbbbbbbbbbbbbbbaa6aaa6a6a6a6a6a6aaaa666a6a6a6a6a666aaa66abbbbbbbbbbbbbbbbbbbbbbbbbac
-            cabbbbbbbbbbbbbbbbbbbbbbbbbaa6aaa6a6a666a6a6aaaaaa6a666a6a6a6aaaaaaaabbbbbbbbbbbbbbbbbbbbbbbbbac
-            cabbbbbbbbbbbbbbbbbbbbbbbbbaa666a666a6a6a66aaaaa666a6a6aa6aa666aaa6aabbbbbbbbbbbbbbbbbbbbbbbbbac
-            cabbbbbbbbbbbbbbbbbbbbbbbbbaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabbbbbbbbbbbbbbbbbbbbbbbbbac
-            cabbbbbbbbbbbbbbbbbbbbbbbbbbaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabbbbbbbbbbbbbbbbbbbbbbbbbbac
+            cabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbcaaaaaaacbac
+            cabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbcccccccbbac
+            cabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbac
+            cabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbac
+            cabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbac
+            cabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbac
+            cabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbac
+            cabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbac
             cabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbac
             cabbbbbbaaaaaaaaaaaaaaaaabbbbaaaaaaaaaaaaaaaaabbbbaaaaaaaaaaaaaaaaabbbbaaaaaaaaaaaaaaaaabbbbbbac
             cabbbbbaaaaaaaaaaaaaaaaaaabbaaaaaaaaaaaaaaaaaaabbaaaaaaaaaaaaaaaaaaabbaaaaaaaaaaaaaaaaaaabbbbbac
@@ -29007,29 +28740,29 @@ function openSaveMenu (open: boolean) {
             cabbbbbaaaddd777777dddbaaabbaaaddd666666dddbaaabbaaa111114111111faaabbaaa111b1111a111caaabbbbbac
             cabbbbbbaaddd777777dddbaabbbbaaddd666666dddbaabbbbaa114444444411faabbbbaa333a1151a333caabbbbbbac
             cabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbac
-            cabbbbbb22222222222222222bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbac
-            cabbbbb2222222222222222222bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbac
-            cabbbbb2222222222222222222bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbac
-            cabbbbb2222223333333222222bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbac
-            cabbbbb2222223222223222222bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbac
-            cabbbbb2223333333333333222bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbaaaaaaaaaaaaaaaaaaaaaaaaaaaabbac
-            cabbbbb2223222222222223222bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabac
-            cabbbbb2223333333333333222bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbaacccbbbccbcaaaaaaa5555555aaaabac
-            cabbbbb2222323232323232222bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbaacccbbbccbccaaaaa566666665aaabac
-            cabbbbb2222323232323232222bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbaacccbbbccbcccaaa56666666665aabac
-            cabbbbb2222323232323232222bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbaacccbbbbbbccccaa56665556665aabac
-            cabbbbb2222323232323232222bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbaacccccccccccccaa56656665665aabac
-            cabbbbb2222323232323232222bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbaacccccccccccccaa56656665665aabac
-            cabbbbb2222323232323232222bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbaaccbbbbbbbbbccaa56655555665aabac
-            cabbbbb2222323232323232222bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbaaccbcccccccbccaa56656665665aabac
-            cabbbbb2222323232323232222bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbaaccbbbbbbbbbccaa56666666665aabac
-            cabbbbb2222323232323232222bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbaaccbcccccccbccaaa566666665aaabac
-            cabbbbb2222333333333332222bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbaaccbbbbbbbbbccaaaa5555555aaaabac
-            cabbbbb2222222222222222222bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabac
-            cabbbbbb22222222222222222bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbaaaaaaaaaaaaaaaaaaaaaaaaaaaabbac
-            caabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbaac
-            ccaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaacc
-            .cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc.
+            cabbbbbb22222222222222222bbbbbbbbbbbcccccccccccccccccccccccccccccbbccccccccccccccccccccccccccccc
+            cabbbbb2222222222222222222bbbbbbbbbbcfffffffffffffffffffffffffffcbbcfffffffffffffffffffffffffffc
+            cabbbbb2222222222222222222bbbbbbbbbbcfffffffffffffffffffffffffffcbbcfffffffffffffffffffffffffffc
+            cabbbbb2222223333333222222bbbbbbbbbbcffff9f9f9f999f9f999f999ffffcbbcffffff5fff555f555f55fffffffc
+            cabbbbb2222223222223222222bbbbbbbbbbcffff9f9f9f9f9f9ff9ff9ffffffcbbcffffff5fff5f5f5f5f5f5ffffffc
+            cabbbbb2223333333333333222bbbbbbbbbbcffff9f9f9f99ff9ff9ff999ffffcbbcffffff5fff5f5f5f5f5f5ffffffc
+            cabbbbb2223222222222223222bbbbbbbbbbcffff9f9f9f9f9f9ff9ff9ffffffcbbcffffff5fff5f5f555f5f5ffffffc
+            cabbbbb2223333333333333222bbbbbbbbbbcffff99999f9f9f9ff9ff999ffffcbbcffffff555f555f5f5f55fffffffc
+            cabbbbb2222323232323232222bbbbbbbbbbcfffffffffffffffffffffffffffcbbcfffffffffffffffffffffffffffc
+            cabbbbb2222323232323232222bbbbbbbbbbcfffffffffffffffffffffffffffcbbcfffffffffffffffffffffffffffc
+            cabbbbb2222323232323232222bbbbbbbbbbcfaaa999aa9affffff9999999fffcbbcfaaa555aa5affffff5555555fffc
+            cabbbbb2222323232323232222bbbbbbbbbbcfaaa999aa9aaffff988888889ffcbbcfaaa555aa5aaffff566666665ffc
+            cabbbbb2222323232323232222bbbbbbbbbbcfaaa999aa9aaaff98888888889fcbbcfaaa555aa5aaaff56666666665fc
+            cabbbbb2222323232323232222bbbbbbbbbbcfaaa999999aaaaf98899998889fcbbcfaaa555555aaaaf56665556665fc
+            cabbbbb2222323232323232222bbbbbbbbbbcfaaaaaaaaaaaaaf98898889889fcbbcfaaaaaaaaaaaaaf56656665665fc
+            cabbbbb2222323232323232222bbbbbbbbbbcfaaaaaaaaaaaaaf98899998889fcbbcfaaaaaaaaaaaaaf56656665665fc
+            cabbbbb2222323232323232222bbbbbbbbbbcfaa999999999aaf98898889889fcbbcfaa555555555aaf56655555665fc
+            cabbbbb2222333333333332222bbbbbbbbbbcfaa9ccccccc9aaf98899998889fcbbcfaa5aaaaaaa5aaf56656665665fc
+            cabbbbb2222222222222222222bbbbbbbbbbcfaa999999999aaf98888888889fcbbcfaa555555555aaf56666666665fc
+            cabbbbbb22222222222222222bbbbbbbbbbbcfaa9ccccccc9aaff988888889ffcbbcfaa5aaaaaaa5aaff566666665ffc
+            caabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbcfaa999999999aafff9999999fffcbbcfaa555555555aafff5555555fffc
+            ccaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaacfffffffffffffffffffffffffffcaacfffffffffffffffffffffffffffc
+            .ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
             `, SpriteKind.noInteract)
         saveSelectorSprite = sprites.create(img`
             .55555555555555555.
@@ -29419,6 +29152,256 @@ function armoredGhastBlast (GhastInQuestion: Sprite) {
         })
     }
 }
+controller.down.onEvent(ControllerButtonEvent.Pressed, function () {
+    if (runGame && !(mapActive)) {
+        if (!(tridentSequenceLockout) && !(aiming) && (attack == 0 && !(blocking)) && bowUnlocked) {
+            aiming = true
+            arrowCharge = 0
+            playerBow = sprites.create(img`
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                `, SpriteKind.playerBow)
+            chargeDot = sprites.create(img`
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                `, SpriteKind.scope)
+            if (!(fireworkBowUpgrade)) {
+                animation.runImageAnimation(
+                playerBow,
+                [img`
+                    . . . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . . . 
+                    . . . . . d d d . . . . . . . . . . 
+                    . . . . f . . d d . . . . . . . . . 
+                    . . . . f . . . d . . . . . . . . . 
+                    . . . f . . . . . d 1 . . . . . . . 
+                    . . . f . . . e e d 1 1 . . . . . . 
+                    . . . 1 1 e e . . d 1 . . . . . . . 
+                    . . 1 1 . . . . . d . . . . . . . . 
+                    . . . . f . . . d . . . . . . . . . 
+                    . . . . f . . d d . . . . . . . . . 
+                    . . . . . d d d . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . . . 
+                    `,img`
+                    . . . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . . . 
+                    . . . . . d d d . . . . . . . . . . 
+                    . . . . f . . d d . . . . . . . . . 
+                    . . . . f . . . d . . . . . . . . . 
+                    . . . f . . . . . d 1 . . . . . . . 
+                    . . . f . . . e e d 1 1 . . . . . . 
+                    . . . 1 1 e e . . d 1 . . . . . . . 
+                    . . 1 1 . . . . . d . . . . . . . . 
+                    . . . . f . . . d . . . . . . . . . 
+                    . . . . f . . d d . . . . . . . . . 
+                    . . . . . d d d . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . . . 
+                    `,img`
+                    . . . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . . . 
+                    . . . . . d d d . . . . . . . . . . 
+                    . . . . f . . d d . . . . . . . . . 
+                    . . . f . . . . d . . . . . . . . . 
+                    . . f . . . . . . d 1 . . . . . . . 
+                    . f . . . . e e e d 1 1 . . . . . . 
+                    . 1 1 e e e . . . d 1 . . . . . . . 
+                    1 1 f . . . . . . d . . . . . . . . 
+                    . . . f . . . . d . . . . . . . . . 
+                    . . . . f . . d d . . . . . . . . . 
+                    . . . . . d d d . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . . . 
+                    `,img`
+                    . . . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . . . 
+                    . . . . d d d . . . . . . . . . . . 
+                    . . . f . . . d . . . . . . . . . . 
+                    . . f . . . . . d . . . . . . . . . 
+                    . f . . . . . . . 1 1 . . . . . . . 
+                    f . . . . . e e e d 1 1 . . . . . . 
+                    f 1 1 e e e . . . 1 1 . . . . . . . 
+                    1 1 . . . . . . . d . . . . . . . . 
+                    . f f . . . . . d . . . . . . . . . 
+                    . . . f . . . d d . . . . . . . . . 
+                    . . . . d d d . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . . . 
+                    `],
+                400,
+                false
+                )
+            } else {
+                animation.runImageAnimation(
+                playerBow,
+                [img`
+                    . . . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . . . 
+                    . . . . . . f e e . . . . . . . . . 
+                    . . . . . . e f d e e . . . . . . . 
+                    . . . . . . . f . d d e . 1 2 . . . 
+                    c c c . c a f 1 2 2 1 2 c 1 2 2 . . 
+                    c e c e c d e f 2 1 2 2 c 1 2 2 2 . 
+                    c e e e e d . f 1 2 2 e e 1 2 2 . . 
+                    . . . . d b . f . e e d e 1 2 . . . 
+                    . . . . d . f e e d d d . . . . . . 
+                    . . . . . . e d d d . . . . . . . . 
+                    . . . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . . . 
+                    `,img`
+                    . . . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . . . 
+                    . . . . . . f e e . . . . . . . . . 
+                    . . . . . . f d d e e . . . . . . . 
+                    . . . . . . f . . d d e . 1 2 . . . 
+                    c c c . c f a 1 2 2 1 2 c 1 2 2 . . 
+                    c e c e c d f 2 2 1 2 2 c 1 2 2 2 . 
+                    c e e e e d f 2 1 2 2 e e 1 2 2 . . 
+                    . . . . d b f . . e e d e 1 2 . . . 
+                    . . . . d . f e e d d d . . . . . . 
+                    . . . . . . e d d d . . . . . . . . 
+                    . . . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . . . 
+                    `,img`
+                    . . . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . . . 
+                    . . . . . . f e e . . . . . . . . . 
+                    . . . . . f e d d e e . . . . . . . 
+                    . . . . . f . . . d d e . 1 2 . . . 
+                    c c c . c a a 1 2 2 1 2 c 1 2 2 . . 
+                    c e c e f d e 2 2 1 2 2 c 1 2 2 2 . 
+                    c e e e e f e 2 1 2 2 e e 1 2 2 . . 
+                    . . . . d f . . . e e d e 1 2 . . . 
+                    . . . . d . f e e d d d . . . . . . 
+                    . . . . . . e d d d . . . . . . . . 
+                    . . . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . . . 
+                    `,img`
+                    . . . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . . . 
+                    . . . . . . f e e . . . . . . . . . 
+                    . . . . . f e d d e e . . . . . . . 
+                    . . . . f . . . . d d e . 1 2 . . . 
+                    c c c f c a a 1 2 2 1 2 c 1 2 2 . . 
+                    c e c f c d e 2 2 1 2 2 c 1 2 2 2 . 
+                    c e e e f d e 2 1 2 2 e e 1 2 2 . . 
+                    . . . . d f . . . e e d e 1 2 . . . 
+                    . . . . d . f e e d d d . . . . . . 
+                    . . . . . . e d d d . . . . . . . . 
+                    . . . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . . . 
+                    `],
+                400,
+                false
+                )
+            }
+            if (DiamondSet == 4) {
+                animation.runImageAnimation(
+                xTear,
+                playerAnimations[3][4],
+                100,
+                true
+                )
+            } else if (IronSet == 4) {
+                animation.runImageAnimation(
+                xTear,
+                playerAnimations[2][4],
+                100,
+                true
+                )
+            } else if (GoldSet == 4) {
+                animation.runImageAnimation(
+                xTear,
+                playerAnimations[1][4],
+                100,
+                true
+                )
+            } else {
+                animation.runImageAnimation(
+                xTear,
+                playerAnimations[0][4],
+                100,
+                true
+                )
+            }
+            playerBow.z = 10
+            playerBow.setPosition(xTear.x + 4, xTear.y)
+            chargeDot.setPosition(xTear.x, xTear.y)
+            if (upButtonPressed) {
+                angle = Math.min(angle + 2, 10)
+            } else {
+                angle = Math.max(0, angle - scopePull)
+            }
+            endX = xTear.x + radius * Math.cos(angle * 3.1415927 / 180)
+            endY = xTear.y - radius * Math.sin(angle * 3.1415927 / 180)
+            chargeDot.setPosition(endX, endY)
+        }
+    } else {
+        if (saveMenu) {
+            if (saveSelection == 6) {
+                saveSelection = 1
+                readSave()
+                saveSelectorSprite.setPosition(89, 198)
+            } else {
+                saveSelection = 5
+                saveSelectorSprite.setPosition(89, 219)
+                timer.background(function () {
+                    story.clearAllText()
+                    story.spriteSayText(saveSelectorSprite, "Clear ALL save data?", 1, 2, story.TextSpeed.VeryFast)
+                })
+            }
+        }
+    }
+})
 function LogoSplashText () {
     SplashText = [
     "You are a HERO.",
@@ -31293,7 +31276,7 @@ function NetherBackgroundSequence () {
     }
 }
 controller.down.onEvent(ControllerButtonEvent.Released, function () {
-    if (startsequence && !(mapActive)) {
+    if (runGame && !(mapActive)) {
         if (!(tridentSequenceLockout) && (attack == 0 && !(blocking)) && aiming) {
             arrowCalculatedPower = calcArrowPower(arrowCharge)
             sprites.destroy(chargeDot)
@@ -31974,8 +31957,112 @@ function damageProcessingSystem (damage: number) {
     }
     return damage
 }
+controller.down.onEvent(ControllerButtonEvent.Repeated, function () {
+    if (runGame && !(mapActive)) {
+        if (!(tridentSequenceLockout) && aiming && (attack == 0 && !(blocking))) {
+            if (!(fireworkBowUpgrade)) {
+                if (arrowCharge < 20) {
+                    arrowCharge += 0.75
+                }
+            } else {
+                arrowCharge = 30
+            }
+            if (arrowCharge >= 20) {
+                chargeDot.setImage(img`
+                    . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . 
+                    . . . . . . . 9 . . . . . . . . 
+                    . . . . . . . 9 . . . . . . . . 
+                    . . . . . . . 9 . . . . . . . . 
+                    . . . . 9 9 9 . 9 9 9 . . . . . 
+                    . . . . . . . 9 . . . . . . . . 
+                    . . . . . . . 9 . . . . . . . . 
+                    . . . . . . . 9 . . . . . . . . 
+                    . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . 
+                    `)
+                radius = 90
+            } else if (arrowCharge > 14) {
+                chargeDot.setImage(img`
+                    . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . 
+                    . . . . . . . 4 . . . . . . . . 
+                    . . . . . . . 4 . . . . . . . . 
+                    . . . . . 4 4 . 4 4 . . . . . . 
+                    . . . . . . . 4 . . . . . . . . 
+                    . . . . . . . 4 . . . . . . . . 
+                    . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . 
+                    `)
+                radius = 70
+            } else if (arrowCharge > 6) {
+                chargeDot.setImage(img`
+                    . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . 
+                    . . . . . . . 2 . . . . . . . . 
+                    . . . . . . 2 2 2 . . . . . . . 
+                    . . . . . . . 2 . . . . . . . . 
+                    . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . 
+                    `)
+                radius = 40
+            } else {
+                chargeDot.setImage(img`
+                    . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . 
+                    . . . . . . . 2 . . . . . . . . 
+                    . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . 
+                    `)
+                radius = 25
+            }
+            chargeDot.setPosition(xTear.x, xTear.y)
+            chargeDot.z = 10000
+            if (upButtonPressed) {
+                angle = Math.min(angle + 2, 90)
+            } else {
+                angle = Math.max(0, angle - scopePull)
+            }
+            endX = xTear.x + radius * Math.cos(angle * 3.1415927 / 180)
+            endY = xTear.y - radius * Math.sin(angle * 3.1415927 / 180)
+            chargeDot.setPosition(endX, endY)
+        }
+    }
+})
 controller.B.onEvent(ControllerButtonEvent.Released, function () {
-    if (startsequence && BossHammerUnlocked && canLeapingAttack && chargingLeap) {
+    if (runGame && BossHammerUnlocked && canLeapingAttack && chargingLeap) {
         if (!(mapActive)) {
             jumpLock = true
             chargingLeap = false
@@ -32072,15 +32159,23 @@ let playerArrowDX = 0
 let playerArrow: Sprite = null
 let arrowCalculatedPower = 0
 let SplashText: string[] = []
+let endY = 0
+let endX = 0
+let chargeDot: Sprite = null
+let playerBow: Sprite = null
 let saveSprite: Sprite = null
-let shield: Sprite = null
 let storedArmorDrop = 0
+let saveSystemTrip = false
 let EndPillar: Sprite = null
 let End_Crystal: Sprite = null
 let AllLevelBanners: Image[] = []
 let LevelBanner: Sprite = null
 let TridentWaveEffect: Sprite = null
 let waveSprites: Image[][] = []
+let TridentAttack = false
+let upButtonPressed = false
+let deleteSystemTrip = false
+let angle = 0
 let MobsKilledOverall = 0
 let LevelStatsText: TextSprite = null
 let StatBlockSprite: Sprite = null
@@ -32088,7 +32183,6 @@ let lastCreatedTopInner: Sprite = null
 let lastCreatedBottomInner: Sprite = null
 let UpperCaveUnderlay: Image[] = []
 let BottomCaveUnderlay: Image[] = []
-let playerBow: Sprite = null
 let UpperCaveOverlay: Image[] = []
 let lastCreatedCeiling: Sprite = null
 let diamond_boots: Sprite = null
@@ -32104,7 +32198,9 @@ let iron_leggings: Sprite = null
 let iron_chestplate: Sprite = null
 let iron_helmet: Sprite = null
 let ArmorFoundLevel = 0
+let Experience = 0
 let MobsKilledLevel = 0
+let playingLevel = false
 let MobsMissed = 0
 let arrowFunctionOut = 0
 let factor = 0
@@ -32117,6 +32213,7 @@ let mopImages: Image[] = []
 let armorValues: number[][] = []
 let levelMap: Image = null
 let levelMapSprite: Sprite = null
+let chargingLeap = false
 let ExplosionSprite: Sprite = null
 let mobAttackDamage: number[][] = []
 let mobMovementSpeed: number[][] = []
@@ -32125,14 +32222,22 @@ let petAllayIntellisense = false
 let specialDebris: Image[] = []
 let debrisArray: Image[] = []
 let debris: Sprite = null
+let saveSelectorSprite: Sprite = null
+let saveSelection = 0
+let saveMenu = false
+let mapSelection = 0
 let RNGroll = 0
 let LootChestAnimations: Image[][] = []
 let LootChestFallingSprites: Image[] = []
 let LootChestSprite: Sprite = null
+let shield: Sprite = null
+let tridentSequenceLockout = false
+let mapActive = false
 let healthbar: Sprite = null
 let foodbar: Sprite = null
 let fireworkExplosions: Image[][] = []
 let fireworkExplosion: Sprite = null
+let arrowCharge = 0
 let mobArrow: Sprite = null
 let mobArrowAngle = 0
 let deltaY = 0
@@ -32160,6 +32265,7 @@ let FireballDY = 0
 let FireballDX = 0
 let Fireball: Sprite = null
 let mobAnimation: Image[][][] = []
+let inair = 0
 let ShowingArmorHUD = false
 let witherBeamPathing = false
 let showWitherBeam = false
@@ -32175,25 +32281,16 @@ let beam1Coords: Sprite = null
 let witherStormEyeTracedSprite: Sprite = null
 let witherstormSprite: Sprite = null
 let witherStormActive = false
-let mapSelection = 0
-let endY = 0
-let endX = 0
-let angle = 0
-let chargeDot: Sprite = null
-let arrowCharge = 0
-let tridentSequenceLockout = false
 let invincibilityFrame = false
-let swordDamage = 0
 let canCrit = false
-let saveSystemTrip = false
-let chargingLeap = false
+let holdingTrident = false
 let witherStormEyeTrace: Image = null
 let newColor = 0
 let oldColor = 0
 let boolUnlockData = ""
-let netheriteUpgrade = false
 let bowUnlocked = false
 let fireworkBowUpgrade = false
+let TridentUnlocked = false
 let totemOfUndying = false
 let BedrockShield = false
 let DoubleHealth = false
@@ -32203,20 +32300,12 @@ let boolUnlockDataArray: string[] = []
 let EyesCollected = 0
 let WitherSkulls = 0
 let commandBlocksAvailable = 0
-let NetheriteIngots = 0
-let levelUnlocked = 0
 let End = false
-let saveSelectorSprite: Sprite = null
-let saveSelection = 0
-let saveMenu = false
-let holdingTrident = false
-let attack = 0
 let blocking = false
-let inair = 0
-let TridentAttack = false
-let TridentUnlocked = false
-let upButtonPressed = false
-let mapActive = false
+let attack = 0
+let netheriteUpgrade = false
+let swordDamage = 0
+let NetheriteIngots = 0
 let totalArmor = 0
 let slot4Boots: Sprite = null
 let armorSlot4: Sprite = null
@@ -32243,13 +32332,10 @@ let GoldSword = false
 let defaultSword = false
 let arrowGravity = false
 let aiming = false
-let startsequence = false
+let runGame = false
 let GoldSet = 0
 let IronSet = 0
 let DiamondSet = 0
-let getironarmor = 0
-let getgoldarmor = 0
-let getdiamondarmor = 0
 let returntosenderachievement = 0
 let shieldHP = 0
 let xTearLeapingGravity = false
@@ -32264,6 +32350,7 @@ let hardmode = 0
 let scopePull = 0
 let radius = 0
 let Level = 0
+let levelUnlocked = 0
 let skipIntro = false
 skipIntro = true
 Load()
@@ -32282,37 +32369,6 @@ game.onUpdateInterval(600, function () {
         }
         if (lastCreatedBottomInner.right < scene.screenWidth() + 40) {
             placeInnerBottom(lastCreatedBottomInner.right)
-        }
-    }
-})
-forever(function () {
-    if (startsequence) {
-        if (aiming) {
-            playerBow.y = xTear.y
-        } else {
-            sprites.destroy(playerBow)
-        }
-        if (arrowGravity) {
-            playerArrow.vy += 1.5
-            if (playerArrow.isHittingTile(CollisionDirection.Bottom)) {
-                sprites.destroy(playerArrow)
-            }
-        }
-    }
-    if (startsequence) {
-        if (inair == 1) {
-            xTear.vy += 6.5
-            timer.after(600, function () {
-                if (!(canCrit)) {
-                    canCrit = true
-                }
-            })
-        } else {
-            canCrit = false
-            xTear.bottom = 241
-        }
-        if (xTearLeapingGravity) {
-            xTearLeapingSprite.vy += 6.5
         }
     }
 })
@@ -32342,32 +32398,34 @@ game.onUpdateInterval(350, function () {
     }
 })
 forever(function () {
-    if (DiamondSet == 4) {
-        if (getdiamondarmor == 0) {
-            getdiamondarmor = 1
+    if (runGame) {
+        if (aiming) {
+            playerBow.y = xTear.y
+        } else {
+            sprites.destroy(playerBow)
         }
-        diamondSword = true
-        swordDamage = 12
-    } else if (IronSet == 4) {
-        if (getironarmor == 0) {
-            getironarmor = 1
+        if (arrowGravity) {
+            playerArrow.vy += 1.5
+            if (playerArrow.isHittingTile(CollisionDirection.Bottom)) {
+                sprites.destroy(playerArrow)
+            }
         }
-        ironSword = true
-        swordDamage = 10
-    } else if (GoldSet == 4) {
-        if (getgoldarmor == 0) {
-            getgoldarmor = 1
-        }
-        GoldSword = true
-        swordDamage = 8
-    } else {
-        swordDamage = 6
     }
-})
-game.onUpdateInterval(1000, function () {
-    let playingLevel = 0
-    if (playingLevel) {
-        info.changeScoreBy(10)
+    if (runGame) {
+        if (inair == 1) {
+            xTear.vy += 6.5
+            timer.after(600, function () {
+                if (!(canCrit)) {
+                    canCrit = true
+                }
+            })
+        } else {
+            canCrit = false
+            xTear.bottom = 241
+        }
+        if (xTearLeapingGravity) {
+            xTearLeapingSprite.vy += 6.5
+        }
     }
 })
 game.onUpdateInterval(1600, function () {
