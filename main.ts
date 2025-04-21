@@ -1008,11 +1008,6 @@ function smallLeap () {
         })
     })
 }
-controller.menu.onEvent(ControllerButtonEvent.Pressed, function () {
-    if (skipIntro) {
-        map()
-    }
-})
 function StopBackgroundSequence () {
     sprites.destroyAllSpritesOfKind(SpriteKind.Caves)
     sprites.destroyAllSpritesOfKind(SpriteKind.Ceilings)
@@ -1029,14 +1024,10 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.Fireball, function (sprite, othe
         scene.cameraShake(3, 100)
         music.play(music.melodyPlayable(music.smallCrash), music.PlaybackMode.InBackground)
         sprites.destroy(otherSprite)
-        if (!(blocking)) {
-            if (!(sprites.readDataBoolean(otherSprite, "ReturningFireball"))) {
-                damageProcessingSystem(2 * sprites.readDataNumber(otherSprite, "FireballPower"))
-            }
-        } else {
-            shieldHP += -1 * sprites.readDataNumber(otherSprite, "FireballPower")
+        if (!(sprites.readDataBoolean(otherSprite, "ReturningFireball"))) {
+            damageProcessingSystem(2 * sprites.readDataNumber(otherSprite, "FireballPower"))
+            Explode(otherSprite.x, otherSprite.y, 1 * sprites.readDataNumber(otherSprite, "FireballPower"), sprites.readDataBoolean(otherSprite, "Super"))
         }
-        Explode(otherSprite.x, otherSprite.y, 1 * sprites.readDataNumber(otherSprite, "FireballPower"), sprites.readDataBoolean(otherSprite, "Super"))
     }
 })
 function EndBackgroundSequence () {
@@ -1467,20 +1458,11 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.mob, function (sprite, otherSpri
                 })
             }
         } else {
-            if (!(invincibilityFrame) && sprites.readDataNumber(otherSprite, "AttackDamage") > 0) {
-                if (!(blocking)) {
-                    music.play(music.createSoundEffect(WaveShape.Square, 200, 1, 255, 0, 100, SoundExpressionEffect.None, InterpolationCurve.Curve), music.PlaybackMode.InBackground)
-                    damageProcessingSystem(sprites.readDataNumber(otherSprite, "AttackDamage"))
-                } else {
-                    shieldHP += -30
-                    music.play(music.createSoundEffect(WaveShape.Noise, 746, 301, 255, 0, 200, SoundExpressionEffect.Warble, InterpolationCurve.Linear), music.PlaybackMode.InBackground)
-                    scene.cameraShake(2, 100)
-                    otherSprite.vx = 87
-                    timer.after(randint(200, 250), function () {
-                        otherSprite.vx = sprites.readDataNumber(otherSprite, "MovementSpeed") * -1
-                    })
-                }
-            }
+            damageProcessingSystem(sprites.readDataNumber(otherSprite, "AttackDamage"))
+            otherSprite.vx = 87
+            timer.after(randint(200, 250), function () {
+                otherSprite.vx = sprites.readDataNumber(otherSprite, "MovementSpeed") * -1
+            })
         }
     }
 })
@@ -2619,6 +2601,7 @@ function lootReward (loot: Image) {
                 game.setDialogTextColor(7)
                 game.showLongText("SHIELD REPAIRED!", DialogLayout.Top)
                 shieldHP = 500
+                pauseUntil(() => controller.A.isPressed())
             })
         } else if (loot.equals(img`
             fffffffffffffffffffffffffffffffffffffffffffffffff
@@ -2750,6 +2733,7 @@ function lootReward (loot: Image) {
                     `)
                 game.setDialogTextColor(5)
                 game.showLongText("BOW UNLOCKED!", DialogLayout.Top)
+                pauseUntil(() => controller.A.isPressed())
             })
         } else if (loot.equals(img`
             fffffffffffffffffffffffffffffffffffffffffffffffff
@@ -3064,6 +3048,7 @@ function lootReward (loot: Image) {
                     `)
                 game.setDialogTextColor(1)
                 game.showLongText("" + EyesCollected + "/12 EYES COLLECTED!", DialogLayout.Top)
+                pauseUntil(() => controller.A.isPressed())
             })
         } else if (loot.equals(img`
             fffffffffffffffffffffffffffffffffffffffffffffffff
@@ -3159,6 +3144,7 @@ function lootReward (loot: Image) {
                 game.setDialogTextColor(1)
                 game.showLongText("TRIDENT UNLOCKED", DialogLayout.Top)
                 TridentUnlocked = true
+                pauseUntil(() => controller.A.isPressed())
             })
         } else if (loot.equals(img`
             fffffffffffffffffffffffffffffffffffffffffffffffff
@@ -3398,6 +3384,7 @@ function lootReward (loot: Image) {
                     `)
                 game.setDialogTextColor(1)
                 game.showLongText("" + WitherSkulls + "/3 SKULLS COLLECTED!", DialogLayout.Top)
+                pauseUntil(() => controller.A.isPressed())
             })
         } else if (loot.equals(img`
             fffffffffffffffffffffffffffffffffffffffffffffffff
@@ -3496,6 +3483,7 @@ function lootReward (loot: Image) {
                     `)
                 game.setDialogTextColor(1)
                 game.showLongText("" + NetheriteIngots + "/4 INGOTS COLLECTED!", DialogLayout.Top)
+                pauseUntil(() => controller.A.isPressed())
             })
         } else if (loot.equals(img`
             fffffffffffffffffffffffffffffffffffffffffffffffff
@@ -3629,6 +3617,7 @@ function lootReward (loot: Image) {
                 game.setDialogTextColor(1)
                 game.showLongText("BEDROCK SHIELD UNLOCKED", DialogLayout.Top)
                 BedrockShield = true
+                pauseUntil(() => controller.A.isPressed())
             })
         } else if (loot.equals(img`
             fffffffffffffffffffffffffffffffffffffffffffffffff
@@ -3794,6 +3783,7 @@ function lootReward (loot: Image) {
                     `)
                 game.setDialogTextColor(2)
                 game.showLongText("LEGENDARY WEAPON UNLOCKED", DialogLayout.Top)
+                pauseUntil(() => controller.A.isPressed())
             })
         } else if (loot.equals(img`
             fffffffffffffffffffffffffffffffffffffffffffffffff
@@ -3888,6 +3878,7 @@ function lootReward (loot: Image) {
                     `)
                 game.setDialogTextColor(2)
                 game.showLongText("LEGENDARY WEAPON UNLOCKED", DialogLayout.Top)
+                pauseUntil(() => controller.A.isPressed())
             })
         } else if (loot.equals(img`
             fffffffffffffffffffffffffffffffffffffffffffffffff
@@ -3928,6 +3919,7 @@ function lootReward (loot: Image) {
         } else {
             story.spriteSayText(xTear, "A COMMAND BLOCK?", 2, 15, story.TextSpeed.Normal)
         }
+        delayMap = false
     })
 }
 function mobRunArmoredBlaze (Blaze: Sprite) {
@@ -4015,8 +4007,19 @@ function mobDamageProcessingSystem (damage: number, sprite: Sprite) {
                 }
             }
             timer.after(50, function () {
+                if (sprites.readDataBoolean(sprite, "LastMob")) {
+                    for (let mob of sprites.allOfKind(SpriteKind.mob)) {
+                        if (sprites.readDataNumber(mob, "Health") > 0) {
+                            sprites.setDataBoolean(sprite, "LastMob", false)
+                            mob.sayText("lastMob")
+                            sprites.setDataBoolean(mob, "LastMob", true)
+                        }
+                    }
+                }
                 sprites.destroy(sprite, effects.ashes, 100)
+                effects.clearParticles(sprite)
                 info.changeScoreBy(10 * mobHealth[sprites.readDataNumber(sprite, "col")][sprites.readDataNumber(sprite, "row")])
+                MobsKilledLevel += 1
             })
         } else {
             animation.runImageAnimation(
@@ -4042,12 +4045,7 @@ function mobDamageProcessingSystem (damage: number, sprite: Sprite) {
 }
 sprites.onOverlap(SpriteKind.Player, SpriteKind.mobArrow, function (sprite, otherSprite) {
     sprites.destroy(otherSprite)
-    if (!(blocking)) {
-        damageProcessingSystem(sprites.readDataNumber(otherSprite, "MobArrowDamage"))
-    } else {
-        scene.cameraShake(3, 50)
-        shieldHP += -1 * sprites.readDataNumber(otherSprite, "MobArrowDamage")
-    }
+    damageProcessingSystem(sprites.readDataNumber(otherSprite, "MobArrowDamage"))
 })
 function GameIntro () {
     sprites.destroy(Logo, effects.disintegrate, 100)
@@ -5329,7 +5327,7 @@ function mobRunCreeper (Creeper: Sprite) {
 }
 function flyingMachineDropsTNT (machineSprite: Sprite) {
     timer.after(1000, function () {
-        if (sprites.readDataNumber(machineSprite, "Health") > 0) {
+        if (sprites.readDataNumber(machineSprite, "Health") > 0 && machineSprite.x > 20) {
             music.play(music.createSoundEffect(WaveShape.Noise, 3900, 3500, 255, 0, 10, SoundExpressionEffect.None, InterpolationCurve.Linear), music.PlaybackMode.InBackground)
             timer.after(20, function () {
                 music.play(music.createSoundEffect(WaveShape.Noise, 200, 600, 255, 0, 150, SoundExpressionEffect.None, InterpolationCurve.Linear), music.PlaybackMode.InBackground)
@@ -5386,6 +5384,13 @@ function flyingMachineDropsTNT (machineSprite: Sprite) {
         }
     })
 }
+sprites.onDestroyed(SpriteKind.mob, function (sprite) {
+    if (sprites.readDataBoolean(sprite, "LastMob")) {
+        timer.after(750, function () {
+            playingLevel = false
+        })
+    }
+})
 function loadSave (saveFile: number) {
     info.setScore(blockSettings.readNumberArray(convertToText(saveFile))[0])
     levelUnlocked = blockSettings.readNumberArray(convertToText(saveFile))[1]
@@ -6453,6 +6458,7 @@ sprites.onOverlap(SpriteKind.playerArrow, SpriteKind.mob, function (sprite, othe
 })
 function updateSaturationHealthDisplay () {
     if (runGame) {
+        foodbar.setPosition(healthbar.x + 80, healthbar.y + 4)
         if (saturation >= 20) {
             foodbar.setImage(img`
                 ffff...ffff...ffff...ffff...ffff...ffff...ffff...ffff...ffff...ffff....
@@ -8767,6 +8773,7 @@ controller.left.onEvent(ControllerButtonEvent.Repeated, function () {
     }
 })
 function specialLootRoll (Red: boolean) {
+    delayMap = true
     if (Red) {
         LootChestSprite = sprites.create(LootChestFallingSprites[0], SpriteKind.noInteract)
     } else {
@@ -9414,21 +9421,26 @@ controller.left.onEvent(ControllerButtonEvent.Pressed, function () {
     if (runGame) {
     	
     } else {
-        if (mapActive) {
-            if (!(mapSelection <= 1)) {
-                mapSelection += -1
-                map()
-            }
-        }
         if (saveMenu) {
-            if (saveSelection > 1) {
-                saveSelection += -1
-                saveSelectorSprite.x += -21
-                readSave()
+            if (!(saveSelection == 5 || saveSelection == 6)) {
+                if (saveSelection > 1) {
+                    saveSelection += -1
+                    saveSelectorSprite.x += -21
+                    readSave()
+                } else {
+                    saveSelection = 4
+                    saveSelectorSprite.setPosition(152, 198)
+                    readSave()
+                }
             } else {
-                saveSelection = 4
-                saveSelectorSprite.setPosition(152, 198)
                 readSave()
+            }
+        } else {
+            if (mapActive) {
+                if (!(mapSelection <= 1)) {
+                    mapSelection += -1
+                    map()
+                }
             }
         }
     }
@@ -9592,7 +9604,7 @@ function spawnAllay () {
     petAllayIntellisense = true
     petAllay.setScale(0.5, ScaleAnchor.Middle)
 }
-function spawnMob (mobColumn: number, mobRow: number) {
+function spawnMob (mobColumn: number, mobRow: number, lastMob: boolean) {
     mob = sprites.create(img`
         . . . . . . . . . . . . . . . . 
         . . . . . . . . . . . . . . . . 
@@ -9619,8 +9631,11 @@ function spawnMob (mobColumn: number, mobRow: number) {
     sprites.setDataNumber(mob, "row", mobRow)
     sprites.setDataNumber(mob, "AnimationSpeed", 100)
     mob.setFlag(SpriteFlag.AutoDestroy, false)
-    mob.setFlag(SpriteFlag.GhostThroughWalls, true)
+    mob.setFlag(SpriteFlag.DestroyOnWall, true)
     mob.z = 3
+    if (lastMob) {
+        sprites.setDataBoolean(mob, "LastMob", true)
+    }
     animation.runImageAnimation(
     mob,
     mobAnimation[mobColumn][mobRow],
@@ -9667,6 +9682,9 @@ function spawnMob (mobColumn: number, mobRow: number) {
     } else if (mobColumn == 1 && mobRow == 23) {
         tiles.placeOnTile(mob, tiles.getTileLocation(3, 8))
         mob.setKind(SpriteKind.noInteract)
+    } else if (mobColumn == 1 && mobRow == 13) {
+        tiles.placeOnTile(mob, tiles.getTileLocation(12, 13))
+        mob.y += 8
     } else {
         tiles.placeOnTile(mob, tiles.getTileLocation(12, 14))
     }
@@ -9827,7 +9845,7 @@ function mobRunBlaze (Blaze: Sprite) {
         Blaze.vx = randint(-50, 10)
         Blaze.vy = randint(-50, 50)
         timer.after(randint(400, 600), function () {
-            Blaze.startEffect(effects.fire)
+            Blaze.startEffect(effects.fire, 2000)
             animation.runMovementAnimation(
             Blaze,
             animation.animationPresets(animation.bobbing),
@@ -9864,6 +9882,9 @@ function mobRunBlaze (Blaze: Sprite) {
                                 animation.stopAnimation(animation.AnimationTypes.MovementAnimation, Blaze)
                                 Blaze.vx = randint(-40, -20)
                                 Blaze.vy = -40
+                            }
+                            if (Math.percentChance(70)) {
+                                mobRunBlaze(Blaze)
                             }
                         })
                     })
@@ -9999,7 +10020,6 @@ function map () {
     levelMapSprite = sprites.create(levelMap, SpriteKind.noInteract)
     mapActive = true
     runGame = false
-    mapSelection = 1
     if (levelUnlocked >= 1) {
         for (let mapX = 0; mapX <= 6; mapX++) {
             for (let mapY = 0; mapY <= 6; mapY++) {
@@ -19553,6 +19573,75 @@ function constructArrays () {
         . . . . . . . . . . . . . . . . 
         . . . . . . . . . . . . . . . . 
         . . . . . . . . . . . . . . . . 
+        `],
+    [img`
+        ........ccccccccccf.....
+        ........c.c5...c.cf.....
+        ........ccccccccccf.....
+        ......111114.5.c5cf.....
+        ......11111.5.4c.cf.....
+        ......a1a11421.c.cf.....
+        ......1b11.11.5c4cf.....
+        ......aaa111ccccccf.....
+        ......11111.45.c.cf.....
+        .......e.eccccccccf.....
+        .......1a1..............
+        .......eee..............
+        .......111..............
+        .......1..11............
+        ......1.................
+        ......1.................
+        `,img`
+        ........................
+        ........ccccccccccf.....
+        ........c.c.4.5c.cf.....
+        ........ccccccccccf.....
+        ......111114..5c.cf.....
+        ......11111.2..c4cf.....
+        ......a1a115.1.c.cf.....
+        ......1b11.11.2c5cf.....
+        ......aaa111ccccccf.....
+        ......11111.4..c.cf.....
+        .......e.eccccccccf.....
+        .......1a1..............
+        .......eee..............
+        .......1.1..............
+        .......1.111............
+        .......1................
+        `,img`
+        ........ccccccccccf.....
+        ........c.c5.5.c.cf.....
+        ........ccccccccccf.....
+        ......111115...c.cf.....
+        ......11111.4.4c5cf.....
+        ......a1a114.15c.cf.....
+        ......1b11.1124c.cf.....
+        ......aaa111ccccccf.....
+        ......111114.4.c.cf.....
+        .......e.eccccccccf.....
+        .......1a1..............
+        .......eee..............
+        .......111..............
+        .......1.1..............
+        ........1.1.............
+        ........11..............
+        `,img`
+        ........ccccccccccf.....
+        ........c.c4.55c.cf.....
+        ........ccccccccccf.....
+        ......11111..42c.cf.....
+        ......1111124..c4cf.....
+        ......a1a115.15c.cf.....
+        ......1b11.112.c.cf.....
+        ......aaa111ccccccf.....
+        ......1111154.5c.cf.....
+        .......e.eccccccccf.....
+        .......1a1..............
+        .......eee..............
+        .......111..............
+        ......111...............
+        ......1..111............
+        ......1.................
         `]
     ], [
     [img`
@@ -25110,23 +25199,38 @@ function calcArrowPower (arrowPower: number) {
 }
 scene.onHitWall(SpriteKind.mob, function (sprite, location) {
     sprites.destroy(sprite)
-    MobsMissed += 1
+    sprites.setDataNumber(sprite, "Health", 0)
 })
 function NextLevel (Level: number) {
+    levelBanner(Level)
     if (Level == 1) {
-        timer.after(6500, function () {
-            spawnMob(0, 1)
-            timer.after(3000, function () {
-                spawnMob(0, 1)
-                timer.after(3000, function () {
-                    spawnMob(0, 1)
-                    timer.after(3000, function () {
-                        spawnMob(0, 1)
-                        timer.after(3000, function () {
-                            spawnMob(0, 3)
-                            timer.after(6000, function () {
-                                playingLevel = false
-                            })
+        timer.after(1500, function () {
+            timer.background(function () {
+                pause(1500)
+                timer.background(function () {
+                    spawnMob(0, 0, false)
+                })
+                pause(3000)
+                timer.background(function () {
+                    spawnMob(0, 0, false)
+                })
+                pause(3000)
+                timer.background(function () {
+                    spawnMob(0, 0, false)
+                })
+                pause(5000)
+                timer.background(function () {
+                    pauseUntil(() => !(isMobRemaining))
+                    runGame = false
+                    splashLevelStats()
+                    timer.after(9000, function () {
+                        specialLootRoll(false)
+                        timer.after(11500, function () {
+                            pauseUntil(() => !(delayMap))
+                            if (levelUnlocked <= Level) {
+                                levelUnlocked += 1
+                            }
+                            map()
                         })
                     })
                 })
@@ -25134,27 +25238,83 @@ function NextLevel (Level: number) {
         })
     }
     if (Level == 2) {
-        levelBanner(Level)
-        timer.after(6500, function () {
-            spawnMob(0, 2)
-            timer.after(3000, function () {
-                spawnMob(0, 2)
-                timer.after(3000, function () {
-                    spawnMob(0, 2)
-                    timer.after(3000, function () {
-                        spawnMob(0, 2)
-                        timer.after(3000, function () {
-                            spawnMob(0, 3)
-                            timer.after(6000, function () {
-                                splashLevelStats(MobsKilledLevel, Experience, ArmorFoundLevel)
-                                timer.after(10000, function () {
-                                    info.changeScoreBy(100000)
-                                    specialLootRoll(false)
-                                    timer.after(13500, function () {
-                                        NextLevel(Level + 1)
-                                    })
-                                })
-                            })
+        timer.after(1500, function () {
+            timer.background(function () {
+                pause(1500)
+                timer.background(function () {
+                    spawnMob(0, 1, false)
+                })
+                pause(3000)
+                timer.background(function () {
+                    spawnMob(0, 2, false)
+                })
+                pause(3000)
+                timer.background(function () {
+                    spawnMob(0, 1, false)
+                })
+                pause(1500)
+                timer.background(function () {
+                    spawnMob(0, 1, false)
+                })
+                pause(1500)
+                timer.background(function () {
+                    spawnMob(0, 2, false)
+                })
+                pause(5000)
+                timer.background(function () {
+                    pauseUntil(() => !(isMobRemaining))
+                    runGame = false
+                    splashLevelStats()
+                    timer.after(9000, function () {
+                        specialLootRoll(false)
+                        timer.after(11500, function () {
+                            pauseUntil(() => !(delayMap))
+                            if (levelUnlocked <= Level) {
+                                levelUnlocked += 1
+                            }
+                            map()
+                        })
+                    })
+                })
+            })
+        })
+    }
+    if (Level == 3) {
+        timer.after(1500, function () {
+            timer.background(function () {
+                pause(1500)
+                timer.background(function () {
+                    spawnMob(0, 4, false)
+                })
+                pause(3000)
+                timer.background(function () {
+                    spawnMob(0, 0, false)
+                })
+                pause(3000)
+                timer.background(function () {
+                    spawnMob(0, 2, false)
+                })
+                pause(1500)
+                timer.background(function () {
+                    spawnMob(0, 1, false)
+                })
+                pause(1500)
+                timer.background(function () {
+                    spawnMob(0, 4, false)
+                })
+                pause(5000)
+                timer.background(function () {
+                    pauseUntil(() => !(isMobRemaining))
+                    runGame = false
+                    splashLevelStats()
+                    timer.after(9000, function () {
+                        specialLootRoll(false)
+                        timer.after(11500, function () {
+                            pauseUntil(() => !(delayMap))
+                            if (levelUnlocked <= Level) {
+                                levelUnlocked += 1
+                            }
+                            map()
                         })
                     })
                 })
@@ -26241,26 +26401,333 @@ controller.right.onEvent(ControllerButtonEvent.Pressed, function () {
             }
         }
     } else {
-        if (mapActive) {
-            if (mapSelection < levelUnlocked) {
-                mapSelection += 1
-                map()
-            }
-        }
         if (saveMenu) {
-            if (saveSelection < 4) {
-                saveSelection += 1
-                saveSelectorSprite.x += 21
-                readSave()
+            if (!(saveSelection == 5 || saveSelection == 6)) {
+                if (saveSelection < 4) {
+                    saveSelection += 1
+                    saveSelectorSprite.x += 21
+                    readSave()
+                } else {
+                    saveSelection = 1
+                    saveSelectorSprite.setPosition(89, 198)
+                    readSave()
+                }
             } else {
-                saveSelection = 1
-                saveSelectorSprite.setPosition(89, 198)
                 readSave()
+            }
+        } else {
+            if (mapActive) {
+                if (mapSelection < levelUnlocked) {
+                    mapSelection += 1
+                    map()
+                }
             }
         }
     }
 })
-function splashLevelStats (mobsKilled: number, experienceGained: number, foundArmor: number) {
+function trySpawnFood (_type: number) {
+    if (saturation < 20) {
+        if (_type == 1) {
+            apple = sprites.createProjectileFromSide(img`
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                `, -25, 0)
+            apple.setKind(SpriteKind.Food)
+            tiles.placeOnTile(apple, tiles.getTileLocation(12, 14))
+            apple.setScale(0.75, ScaleAnchor.Bottom)
+            animation.runImageAnimation(
+            apple,
+            [img`
+                . . . . . . . . . d e . . . . . 
+                . . . . . . . . d e . . . . . . 
+                . . . . . . . . d e . . . . . . 
+                . . . . e e e d d e e . . . . . 
+                . . e e 1 1 2 2 e 2 3 e e . . . 
+                . e 2 3 3 1 1 1 1 3 3 3 3 e e . 
+                . e 2 3 3 3 3 3 3 3 3 3 3 2 e e 
+                . e 2 3 3 3 3 3 3 3 3 2 2 2 2 e 
+                . e 2 2 2 3 3 3 2 2 2 2 2 2 3 e 
+                . e 2 2 2 2 2 2 2 2 2 2 2 3 3 e 
+                . d 2 2 2 2 2 2 2 2 2 2 2 3 3 e 
+                . d 2 2 2 2 2 2 2 2 2 2 2 3 3 e 
+                . . d 2 2 2 2 2 2 2 2 2 3 3 e . 
+                . . d 2 2 2 2 2 2 2 2 2 3 3 e . 
+                . . . e 2 2 2 2 2 2 2 3 3 e . . 
+                . . . . e e d d e e e e e . . . 
+                `,img`
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . d e . . . . . 
+                . . . . . . . . d e . . . . . . 
+                . . . . . . . . d e . . . . . . 
+                . . . . e e e d d e e . . . . . 
+                . . e e 1 1 2 2 e 2 3 e e . . . 
+                . e 2 3 3 1 1 1 1 3 3 3 3 e e . 
+                . e 2 3 3 3 3 3 3 3 3 3 3 2 e e 
+                . e 2 3 3 3 3 3 3 3 3 2 2 2 2 e 
+                . e 2 2 2 3 3 3 2 2 2 2 2 2 3 e 
+                . e 2 2 2 2 2 2 2 2 2 2 2 3 3 e 
+                . d 2 2 2 2 2 2 2 2 2 2 2 3 3 e 
+                . . d 2 2 2 2 2 2 2 2 2 3 3 e . 
+                . . d 2 2 2 2 2 2 2 2 2 3 3 e . 
+                . . . e 2 2 2 2 2 2 2 3 3 e . . 
+                . . . . e e d d e e e e e . . . 
+                `],
+            500,
+            true
+            )
+        }
+        if (_type == 2) {
+            cake = sprites.createProjectileFromSide(img`
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                `, -25, 0)
+            cake.setKind(SpriteKind.Food)
+            tiles.placeOnTile(cake, tiles.getTileLocation(12, 14))
+            cake.setScale(0.75, ScaleAnchor.Bottom)
+            animation.runImageAnimation(
+            cake,
+            [img`
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . 1 1 1 1 1 1 1 1 . . . . 
+                . . 1 1 1 1 1 1 1 1 1 3 1 1 . . 
+                . 1 1 1 3 1 1 1 1 1 1 1 1 1 1 . 
+                1 1 1 1 1 1 1 2 2 1 1 1 1 1 1 1 
+                1 1 1 1 1 1 2 2 2 2 1 1 1 1 3 1 
+                1 3 1 1 1 1 1 2 2 1 1 1 1 1 1 1 
+                1 1 1 1 1 1 1 1 1 1 1 1 3 1 1 1 
+                e 1 1 1 3 1 1 1 1 1 1 1 1 1 1 e 
+                e d 1 1 1 1 1 1 1 1 1 1 1 1 d e 
+                e d d d 1 1 1 1 1 1 1 1 d d d e 
+                e d d d 1 d d d d d 1 d d d d e 
+                . e d d d d d d d d d d d d e . 
+                . . e e d d d d d d d d e e . . 
+                . . . . e e e e e e e e . . . . 
+                `,img`
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . 1 1 1 1 1 1 1 1 . . . . 
+                . . 1 1 1 1 1 1 1 1 1 3 1 1 . . 
+                . 1 1 1 3 1 1 1 1 1 1 1 1 1 1 . 
+                1 1 1 1 1 1 1 2 2 1 1 1 1 1 1 1 
+                1 1 1 1 1 1 2 2 2 2 1 1 1 1 3 1 
+                1 3 1 1 1 1 1 2 2 1 1 1 1 1 1 1 
+                1 1 1 1 1 1 1 1 1 1 1 1 3 1 1 1 
+                e 1 1 1 3 1 1 1 1 1 1 1 1 1 1 e 
+                e d 1 1 1 1 1 1 1 1 1 1 1 1 d e 
+                e d d 1 1 1 1 1 1 1 1 1 1 d d e 
+                . e d d 1 d d d d d 1 d d d e . 
+                . . e e d d d d d d d d e e . . 
+                . . . . e e e e e e e e . . . . 
+                `],
+            500,
+            true
+            )
+        }
+        if (_type == 3) {
+            goldencarrot = sprites.createProjectileFromSide(img`
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                `, -25, 0)
+            goldencarrot.setKind(SpriteKind.Food)
+            tiles.placeOnTile(goldencarrot, tiles.getTileLocation(12, 14))
+            goldencarrot.setScale(0.75, ScaleAnchor.Bottom)
+            animation.runImageAnimation(
+            goldencarrot,
+            [img`
+                . . . . . . . d . e e e . . . . 
+                . . . . . e e e d e d e e . e e 
+                . . . . d d e e d d e e e d d e 
+                . . . e e e d e d e e e d d e e 
+                . . . . . e e e 1 e e d d e e . 
+                . . . . . d 1 1 1 1 4 e d e d d 
+                . . . . d 1 1 1 1 4 4 4 e e e d 
+                . . . . d 1 1 1 4 4 4 4 4 e e e 
+                . . . d 1 1 1 1 4 4 4 4 4 e e e 
+                . . . d 1 1 1 4 4 4 4 4 e e d d 
+                . . d 1 1 4 4 4 4 4 e e e e d . 
+                . . d 1 1 4 4 4 e e e . . e . . 
+                . d 1 1 4 4 e e e . . . . . . . 
+                . d 1 4 e e e . . . . . . . . . 
+                d 1 e e e . . . . . . . . . . . 
+                d e e . . . . . . . . . . . . . 
+                `,img`
+                . . . . . . . . . . . . . . . . 
+                . . . . . . d . e e e . . . . . 
+                . . . . e e e d e d e e . e e . 
+                . . . d d e e d d e e e d d e . 
+                . . e e e d e d e e e d d e e . 
+                . . . . e e e 1 e e d d e e . . 
+                . . . . d 1 1 1 1 4 e d e d d . 
+                . . . d 1 1 1 1 4 4 4 e e e d . 
+                . . . d 1 1 1 4 4 4 4 4 e e e . 
+                . . d 1 1 1 1 4 4 4 4 4 e e e . 
+                . . d 1 1 1 4 4 4 4 4 e e d d . 
+                . d 1 1 4 4 4 4 4 e e e e d . . 
+                . d 1 1 4 4 4 e e e . . e . . . 
+                . d 1 4 e e e . . . . . . . . . 
+                d 1 e e e . . . . . . . . . . . 
+                d e e . . . . . . . . . . . . . 
+                `],
+            500,
+            true
+            )
+        }
+        if (_type == 4) {
+            goldenapple = sprites.createProjectileFromSide(img`
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                `, -25, 0)
+            goldenapple.setKind(SpriteKind.Food)
+            tiles.placeOnTile(goldenapple, tiles.getTileLocation(12, 14))
+            goldenapple.setScale(0.75, ScaleAnchor.Bottom)
+            animation.runImageAnimation(
+            goldenapple,
+            [img`
+                . . . . . . . . . d e . . . . . 
+                . . . . . . . . d e . . . . . . 
+                . . . . . . . . d e . . . . . . 
+                . . . . e e e d d e e . . . . . 
+                . . e e 1 1 4 4 e 4 5 e e . . . 
+                . e 4 5 5 1 1 1 1 5 5 5 5 e e . 
+                . e 4 5 5 5 5 5 5 5 5 5 5 4 e e 
+                . e 4 5 5 5 5 5 5 5 5 4 4 4 4 e 
+                . e 4 4 4 5 5 5 4 4 4 4 4 4 5 e 
+                . e 4 4 4 4 4 4 4 4 4 4 4 5 5 e 
+                . d 4 4 4 4 4 4 4 4 4 4 4 5 5 e 
+                . d 4 4 4 4 4 4 4 4 4 4 4 5 5 e 
+                . . d 4 4 4 4 4 4 4 4 4 5 5 e . 
+                . . d 4 4 4 4 4 4 4 4 4 5 5 e . 
+                . . . e 4 4 4 4 4 4 4 5 5 e . . 
+                . . . . e e d d e e e e e . . . 
+                `,img`
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . d e . . . . . 
+                . . . . . . . . d e . . . . . . 
+                . . . . . . . . d e . . . . . . 
+                . . . . e e e d d e e . . . . . 
+                . . e e 1 1 4 4 e 4 5 e e . . . 
+                . e 4 5 5 1 1 1 1 5 5 5 5 e e . 
+                . e 4 5 5 5 5 5 5 5 5 5 5 4 e e 
+                . e 4 5 5 5 5 5 5 5 5 4 4 4 4 e 
+                . e 4 4 4 5 5 5 4 4 4 4 4 4 5 e 
+                . e 4 4 4 4 4 4 4 4 4 4 4 5 5 e 
+                . d 4 4 4 4 4 4 4 4 4 4 4 5 5 e 
+                . . d 4 4 4 4 4 4 4 4 4 5 5 e . 
+                . . d 4 4 4 4 4 4 4 4 4 5 5 e . 
+                . . . e 4 4 4 4 4 4 4 5 5 e . . 
+                . . . . e e d d e e e e e . . . 
+                `],
+            500,
+            true
+            )
+        }
+        if (_type == 5) {
+            cookie = sprites.createProjectileFromSide(img`
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                `, -25, 0)
+            cookie.setKind(SpriteKind.Food)
+            tiles.placeOnTile(cookie, tiles.getTileLocation(12, 14))
+            cookie.setScale(0.75, ScaleAnchor.Bottom)
+            animation.runImageAnimation(
+            cookie,
+            [img`
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . e e e e e e e . . . . . 
+                . . e e c d d d d d d e e . . . 
+                . e d d d d d d d d c d d e . . 
+                . e d d c c d d d d c c d e . . 
+                e d d d c d d c c d d d d d e . 
+                c d d d d d d c c d d d c d e . 
+                e d c c d d d d d d d d d d e . 
+                e d c c d d d d d d d d d d e . 
+                e d d d d d d d d d c c d d e . 
+                . e d d d c c d d d c d d e . . 
+                . e d d d c c d d d d d d e . . 
+                . . e e d d d d d d d e e . . . 
+                . . . . e e e e e e e . . . . . 
+                `],
+            500,
+            true
+            )
+        }
+    }
+}
+function splashLevelStats () {
     StatBlockSprite = sprites.createProjectileFromSide(img`
         ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
         f22222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222f
@@ -26287,7 +26754,8 @@ function splashLevelStats (mobsKilled: number, experienceGained: number, foundAr
         f22222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222f
         ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
         `, 0, 100)
-    LevelStatsText = textsprite.create("10913", 0, 2)
+    LevelStatsText = textsprite.create(convertToText(MobsKilledLevel), 0, 2)
+    MobsKilledLevel = 0
     StatBlockSprite.x = 120
     LevelStatsText.setPosition(StatBlockSprite.x + 8, StatBlockSprite.y + -3)
     LevelStatsText.vy = 100
@@ -26327,7 +26795,7 @@ function splashLevelStats (mobsKilled: number, experienceGained: number, foundAr
                 f66666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666f
                 ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
                 `, 0, 100)
-            LevelStatsText = textsprite.create("654", 0, 6)
+            LevelStatsText = textsprite.create(convertToText(Math.round(20 * Math.sqrt(MobsKilledLevel * MobsKilledLevel + info.score() * info.score()) / 1)), 0, 6)
             StatBlockSprite.x = 120
             LevelStatsText.setPosition(StatBlockSprite.x + 8, StatBlockSprite.y + -3)
             LevelStatsText.vy = 100
@@ -26367,7 +26835,8 @@ function splashLevelStats (mobsKilled: number, experienceGained: number, foundAr
                         f44444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444f
                         ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
                         `, 0, 100)
-                    LevelStatsText = textsprite.create("4", 0, 4)
+                    LevelStatsText = textsprite.create(convertToText(ArmorFoundLevel), 0, 4)
+                    ArmorFoundLevel = 0
                     StatBlockSprite.x = 120
                     LevelStatsText.setPosition(StatBlockSprite.x + 8, StatBlockSprite.y + -3)
                     LevelStatsText.vy = 100
@@ -26437,7 +26906,6 @@ function splashLevelStats (mobsKilled: number, experienceGained: number, foundAr
                                 LevelStatsText.vy = 0
                                 music.play(music.melodyPlayable(music.bigCrash), music.PlaybackMode.InBackground)
                                 scene.cameraShake(5, 100)
-                                MobsKilledOverall += MobsKilledLevel
                                 MobsKilledLevel = 0
                                 ArmorFoundLevel = 0
                                 timer.after(2000, function () {
@@ -26477,6 +26945,7 @@ function readSave () {
             .55555555555555555.
             `)
         if (blockSettings.readString("" + saveSelection + "name").isEmpty()) {
+            music.play(music.createSoundEffect(WaveShape.Noise, 3553, 1036, 255, 0, 10, SoundExpressionEffect.None, InterpolationCurve.Linear), music.PlaybackMode.InBackground)
             timer.background(function () {
                 story.clearAllText()
                 if (saveSelection == 1) {
@@ -26493,12 +26962,14 @@ function readSave () {
                 }
             })
         } else {
+            music.play(music.createSoundEffect(WaveShape.Noise, 3553, 1036, 255, 0, 10, SoundExpressionEffect.None, InterpolationCurve.Linear), music.PlaybackMode.InBackground)
             timer.background(function () {
                 story.clearAllText()
                 story.spriteSayText(saveSelectorSprite, blockSettings.readString("" + saveSelection + "name"), 6, 1)
             })
         }
     } else {
+        music.play(music.createSoundEffect(WaveShape.Noise, 3553, 1036, 255, 0, 10, SoundExpressionEffect.None, InterpolationCurve.Linear), music.PlaybackMode.InBackground)
         saveSelectorSprite.setImage(img`
             . 5 5 5 5 5 5 5 . 
             5 . . . . . . . 5 
@@ -26594,6 +27065,9 @@ controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
             })
         }
     } else if (mapActive && !(saveMenu)) {
+        if (mapSelection == 0) {
+            mapSelection = 1
+        }
         playLevel(mapSelection)
     } else if (saveMenu) {
         if (saveSelection == 6) {
@@ -27843,20 +28317,10 @@ function playLevel (mapSelection: number) {
     sprites.destroy(levelMapSprite, effects.disintegrate, 100)
     mapActive = false
     runGame = true
-    playingLevel = true
+    Level = mapSelection
+    updateSaturationHealthDisplay()
     updateArmorSystem()
-    levelBanner(mapSelection)
     NextLevel(mapSelection)
-    timer.background(function () {
-        pauseUntil(() => !(playingLevel))
-        splashLevelStats(MobsKilledLevel, Experience, ArmorFoundLevel)
-        timer.after(10000, function () {
-            specialLootRoll(false)
-            timer.after(13500, function () {
-                map()
-            })
-        })
-    })
 }
 function waitForPlay () {
     foodbar.setImage(img`
@@ -28694,6 +29158,13 @@ function placeInnerTop (num: number) {
     lastCreatedTopInner.left = num
     lastCreatedTopInner.z = -20
 }
+controller.menu.onEvent(ControllerButtonEvent.Pressed, function () {
+    if (runGame) {
+        if (skipIntro) {
+            map()
+        }
+    }
+})
 function openSaveMenu (open: boolean) {
     if (open) {
         saveMenu = true
@@ -28793,9 +29264,9 @@ function openSaveMenu (open: boolean) {
         readSave()
     } else {
         story.clearAllText()
-        saveMenu = false
         sprites.destroy(saveSprite)
         sprites.destroy(saveSelectorSprite)
+        saveMenu = false
     }
 }
 sprites.onDestroyed(SpriteKind.playerArrow, function (sprite) {
@@ -30228,7 +30699,7 @@ function CreateSprites () {
         . . . . . . . . . . . . . . . . 
         . . . . . . . . . . . . . . . . 
         `, SpriteKind.Overlay)
-    tiles.placeOnTile(foodbar, tiles.getTileLocation(9, 15))
+    tiles.placeOnTile(foodbar, tiles.getTileLocation(9, 0 + (0 + 0)))
     tiles.placeOnTile(xTear, tiles.getTileLocation(4, 14))
     tiles.placeOnTile(healthbar, tiles.getTileLocation(4, 15))
     healthbar.x += 7
@@ -30309,10 +30780,10 @@ function blazeBarrage (blazeInQuestion: Sprite, _super: boolean) {
         music.play(music.createSoundEffect(WaveShape.Square, 1221, 1, 255, 0, 100, SoundExpressionEffect.None, InterpolationCurve.Curve), music.PlaybackMode.InBackground)
         if (_super) {
             Fireball = sprites.createProjectileFromSprite(mopImages[1], blazeInQuestion, 0, 0)
-            sprites.setDataNumber(Fireball, "FireballPower", 2)
+            sprites.setDataNumber(Fireball, "FireballPower", 4)
         } else {
             Fireball = sprites.createProjectileFromSprite(mopImages[0], blazeInQuestion, 0, 0)
-            sprites.setDataNumber(Fireball, "FireballPower", 1)
+            sprites.setDataNumber(Fireball, "FireballPower", 2)
         }
         FireballDX = xTear.x + randint(-20, 20) - blazeInQuestion.x
         FireballDY = xTear.y + randint(-20, 20) - blazeInQuestion.y
@@ -30328,10 +30799,10 @@ function blazeBarrage (blazeInQuestion: Sprite, _super: boolean) {
             music.play(music.createSoundEffect(WaveShape.Square, 1221, 1, 255, 0, 100, SoundExpressionEffect.None, InterpolationCurve.Curve), music.PlaybackMode.InBackground)
             if (_super) {
                 Fireball = sprites.createProjectileFromSprite(mopImages[1], blazeInQuestion, 0, 0)
-                sprites.setDataNumber(Fireball, "FireballPower", 2)
+                sprites.setDataNumber(Fireball, "FireballPower", 4)
             } else {
                 Fireball = sprites.createProjectileFromSprite(mopImages[0], blazeInQuestion, 0, 0)
-                sprites.setDataNumber(Fireball, "FireballPower", 1)
+                sprites.setDataNumber(Fireball, "FireballPower", 2)
             }
             FireballDX = xTear.x + randint(-20, 20) - blazeInQuestion.x
             FireballDY = xTear.y + randint(-20, 20) - blazeInQuestion.y
@@ -30348,10 +30819,10 @@ function blazeBarrage (blazeInQuestion: Sprite, _super: boolean) {
                 music.play(music.createSoundEffect(WaveShape.Square, 1221, 1, 255, 0, 100, SoundExpressionEffect.None, InterpolationCurve.Curve), music.PlaybackMode.InBackground)
                 if (_super) {
                     Fireball = sprites.createProjectileFromSprite(mopImages[1], blazeInQuestion, 0, 0)
-                    sprites.setDataNumber(Fireball, "FireballPower", 2)
+                    sprites.setDataNumber(Fireball, "FireballPower", 4)
                 } else {
                     Fireball = sprites.createProjectileFromSprite(mopImages[0], blazeInQuestion, 0, 0)
-                    sprites.setDataNumber(Fireball, "FireballPower", 1)
+                    sprites.setDataNumber(Fireball, "FireballPower", 2)
                 }
                 FireballDX = xTear.x + randint(-20, 20) - blazeInQuestion.x
                 FireballDY = xTear.y + randint(-20, 20) - blazeInQuestion.y
@@ -31264,6 +31735,301 @@ function NetherBackgroundSequence () {
         ................................................................................
         `
     ]
+    if (Level == 11) {
+        tiles.setCurrentTilemap(tilemap`level27`)
+        BottomCaveOverlay = [
+        img`
+            .............................................................222................
+            ...................................................226......22226...............
+            ..................................................22226.....22226...............
+            ..................................................22226.226.2542................
+            ...................226.......................dd1..2222622226..c2................
+            ..................22226....................d.dde.d254.622226..c.................
+            ..................22226....226............6666666666c6622c56..c.................
+            ..........226.....2222226.22226226......66666666666555522c666622................
+            ...22226.22226....2522226.22226226..2222226666666225522222222222................
+            ...22226.22226.....222222622226222622222226666662225522222222222....226.........
+            ..222222622226.....222222625422222622222226666622225522222222222...22226........
+            ..22222262542.....2252222622c22222222222222226662225522222222222...22226....226.
+            ..2522226..c2.22622224c22622c64c2222222222222666..2552222222222....2222226.22226
+            ..2.4c2.6..c.222222226c62662c66c6222222222222666...55222222........2522226.22226
+            .226.c..6..c.222222c56c22226c66c6222222222222666...55.........226...222222622226
+            22226c..226c.222222266c22226c66c6222222222222666...55........22226..22222262542.
+            22226c.222266254622226c64c66c6222222222222222666...55........22226.22522226..c2.
+            22226c.22226666c622226226226c2266222222222222666...55.........4c.622224c2.6..c..
+            2542.c.22c56666c666c6222222222226222222222222666...55......2266c6622226c.266.c..
+            ..c2.2266c66662266622226222222226222222222222666...55.....22226c6622c56c22226c..
+            ..2262226c622222222222226222222226264555cc6626626..55.....22226c6666c66c22226222
+            .222262262222226222222226226222622664455cc66626266.55.....22c56c6666c66c14c26222
+            .22226c56222622262222222226622226222666ccc66626666655...222222222266666dd2dd1222
+            .22222266222262262222522226622226622666ccc66622266655...222222222266666ee2ee22d2
+            625222266222262262222222222622226662666ccc66666666655555222222222266666222222222
+            662222226222262662222222222625426626666ccc66662666555555222222222266666222222222
+            6622222262542c6662222252222666c26226666ccc66662265555555222222222266666222222222
+            62252222666c2c6226222224c26666c66226666ccc66662665522222222222222222222666662222
+            22224c26666c6c2222622226c62666c66666662ccc66662655522222222222222222222666662222
+            22226c62666c6c2222622c56c22226c66626622ccc66622255522222222222222222222666662222
+            22c56c22226c6c22c5662226c22226226622226ccc66662655522222222222222222222666662222
+            66c66c2222622266c6622222c64c66222622666ccc66662255522222222222222222222666662222
+            `,
+        img`
+            .......................................................226......................
+            ......................................................2222226...................
+            ......................................................22222226..................
+            ................................22226.................22222226..................
+            ................................22226.................24422226..................
+            ....22226......................2222226..................c24c.6..................
+            ....22226..................22226222226................66c66c55556666............
+            ...2222226................222222622226................66c66c55566666666666......
+            ...2222226................22222264c..6................66c66c55666666666666......
+            ...2222226................2222226.c2226...............66666c55666666666666......
+            ...2.2c226..........55226264c2666622226................66666556666222222666.....
+            ...2..c.26......226552222666c6666625426.................5522256666222222666.....
+            ......c.6......2222622622666c6666666c266................5222256666222222666.....
+            ......c56.....52222222266666c6662266c66.................5222266222222222222666..
+            ......5.6....5522c522226662266622226c6..................522226.222222222222666..
+            ......c.....55556c62222662222662222626..................525c.6.222222222222666..
+            ......c4...555556c625466625526664c26226.................555c...222222222222666..
+            ......c...5555556c666c66625c56662262226................5552c...222222222222666..
+            ......c..555556622666c66666c66622226226................55222222262222222222666..
+            ......c.5555556222266c666662226222264226...............552222226662555cc44.66...
+            .....2225555562262266c22662222262226c226...............552222222262555cc22.26222
+            ...222225555562226266222262262265466226................552222222265555cc22626222
+            ..2222222555562226662262222226666c622226...............5522222222622444c22666222
+            .22222222555562226622226522226666c622226...............5522222226622444c22266222
+            222222222255565466622226664c66666c622226...............55222222226222ccc22266222
+            222222622255566c66622c46666c66666c62542................55222222266222ccc22266222
+            222222262255566c66666c66666c66666c666c2................22222662222222ccc22226222
+            222222262255566c66666c66666c66662222262225555555555555522222662226222ccc22266222
+            222222262255555666666c66622222622222226225555555555552222222226626222ccc22662222
+            222222262255555555666666222222262222226222555555555552222222226626222ccc22622222
+            222222262255555555555555222222262222226222222555555552222222226626222ccc22c22222
+            222222262225555555555555222222262222226222222222222222222222226622222ccc22666222
+            `,
+        img`
+            ................................................................................
+            ................................................................................
+            .........................................................................22226..
+            .........................................................................22226..
+            .................226....................................................2222226.
+            ................22226...................................................2222226.
+            ................22226...................................................2522226.
+            ................22226...................................................2.4c226.
+            ................2552.......................................................c.26.
+            .22226............c2..226..dd..............................................c.6..
+            .22226............c..22226.d11.22226..................................226..c56..
+            2222226...226.....c..22226.ee..22226..................22226..........22226.5.6..
+            2222226..22226....c662222666662222226...226...........22226..........22226.c....
+            2522226..22226.66666625426666622222266622226.........2222226.........22226.c4...
+            2.4c2666622226.22666626c26666624222266622226.22226...2552226.........2542..c....
+            ..6c6666624426222266626c666226264c2666622226622226...2225226...........c2..c....
+            .22666666664262222666226662222666c66666254262222226..224c2.6....22226..c...c....
+            22226666666c622622662222622622666c6666666c262222226..2..c..6....22226..c...2226.
+            22226226266c222266662222222266666c6662266c662522226..2..c......22222266c6222226.
+            22222222626c2222622622c522226662266622226c66245c2.6..2..c......22222266622222226
+            25222222626226c6222266c6222266222266222262664..c..6.....c..666625222266622222226
+            6222222565222262222266c625466625526664c2622655.c........c226662264c2666622252226
+            622255556222226224c6666666c66625c56662c62226444c444455542222622226c6666625226c26
+            622226c22222c56226c6622666c66666c66622c26226455c422644452222622226c6226662222666
+            625466c22226c64226c6222266666666c22622226422265c222266226222622226c2222662222666
+            622666622c56c6222262262266622666222262226c222266222262222642625466226226664c6666
+            222266666c6662224222226266222262262265466226226664c2222226c2226c6222265666cc6c22
+            22226662266622226222226662262222226666c6222265666622222226c2222622222666226c6222
+            22226622226622226622226622226522226666c6222266622622225466222226224c266222266222
+            25466622226664c66625466622226664c6666666222266222222226c22222c46226c66622226664c
+            66c66622c46666c6c666c66622c46666c6666666254666222225446c25226c64c66c66622c56666c
+            66c66666c66666c66666c66666c66666c666666666c66622c566c6c655c56c66c66c66666c66666c
+            `,
+        img`
+            ................................................................................
+            ................................................................................
+            ................................................................................
+            ................................................................................
+            ...................226..........................................................
+            ..................22226.........................................................
+            ..................22226....226..................................................
+            ..........226.....2222226.22226226..............................................
+            ...22226.22226....2522226.22226226..222222666...................................
+            ...22226.22226.....22222262222622262222222666...................................
+            ..222222622226.....22222262542222262222222666...................................
+            ..22222262542.....2252222622c2222222222222222666............................226.
+            ..2522226..c2.22622224c22622c64c222222222222266666666......................22226
+            ..2.4c2.6..c.222222226c62662c66c62222222222226666666666..............22226.22226
+            .226.c..6..c.222222c56c22226c66c62222222222226666666666.......226666222222622226
+            22226c..226c.222222266c22226c66c6222222222222666666666666....222266622222262542.
+            22226c.222266254622226c64c66c6222222222222222666666666666666622226622522226..c2.
+            22226c.22226666c622226226226c2266222222222222666666666666666664c.622224c2.6..c..
+            2542.c.22c56666c666c6222222222226222222222222666266666666662266c6622226c.2662c..
+            ..c2.2266c66662266622226222222226222222222222666666666666622226c6622c56c22226c22
+            ..2262226c622222222222226222222226264555cc662662666666666622226c6666c66c22226222
+            .222262262222226222222226226222622664455cc666262666666666622c56c6666c66c22226222
+            .22226c56222622262222222226622226222666ccc66626666666666222222222266666c22226222
+            .22222266222262262222522226622226622666ccc66622266666666222222222266666c22426222
+            625222266222262262222222222622226662666ccc66666666666222222222222266666222c26222
+            662222226222262662222222222625426626666ccc66662666666222222222222266666222c22222
+            6622222262542c6662222252222666c26226666ccc66662266662222222222222266666222c22222
+            62252222666c2c6226222224c26666c66226666ccc66662666622222222222222222222666662222
+            22224c26666c6c2222622226c62666c66666662ccc66662666222222222222222222222666662222
+            22226c62666c6c2222622c56c22226c66626622ccc66622262222222222222222222222666662222
+            22c56c22226c6c22c5662226c22226226622226ccc66662622222222222222222222222666662222
+            66c66c2222622266c6622222c64c66222622666ccc66662222222222222222222222222666662222
+            `
+        ]
+        BottomCaveUnderlay = [img`
+            ................................................................................
+            ................................................................................
+            ................................................................................
+            ..........................2222222222............................................
+            .....................222222222222222222.........................................
+            .....................22222222222222222222.......................................
+            ...................442222222222222222222222.....................................
+            ................444442222222222222222222222266............................222222
+            2222...........4444442222222222222222222222266.................222....2222222222
+            22222.........444444444422222222222222222222666........2222222222222222222222222
+            22222244444444444444444442222222222222222222226444444422222222222222222222222222
+            22222244222444444444422244422222222222222222222224444422222222222222222222222222
+            22222222222222222222222244444442222222222222222222444422222222222222222222222222
+            22222222222222222222222244444444442222222222222222444422222222222222222222222222
+            22222222222222222222222244444444444444222222222222444442222222222222222222222222
+            62222222222222222222222222444444444444444444444444444442222222222222222222222222
+            66222222222222222222222222444444444444444444444444444444442222222222222222222222
+            66662222222222222222222222444444444444444444444444444444442222222222222222222222
+            66666622222222222222222244466666666666666666666664444444442222222222222222222222
+            66666666222666222222222666666666666666666666666666664444444222222222222222222222
+            66666666666666622222226666666666666666666666666666666666666666222222222222222222
+            66222666666666666666666666666666666666666666666666666666666666622222222222222222
+            66222226666666666666666666666666666666666666666666666666666666666662222222222222
+            62222222222666666666666666666666666666666666666666666666666666666666666666666666
+            62222222222622266222222666666666666666666666666666666666666666666666666666666666
+            62222222222222222222222222666666666666666666666666666666666666666622266666622226
+            22222222222222222222222222666666666666666666666666666666662222222222222222222226
+            22222222222222222222222222262226666666666666666666666666662222222222222222222226
+            22222222222222222222222222222222222226666666666666666666622222222222222222222226
+            22222222222222222222222222222222222226622222666666666666622222222222222222222226
+            22222222222222222222222222222222222222222222266666666666622222222222222222222222
+            22222222222222222222222222222222222222222222266666666222662222222222222222222222
+            22222222222222222222222222222222222222222222266666222222666222222222222222222222
+            22222222222222222222222222222222222222222222266622222222666666222222222222222222
+            22222222222222222222222222222222222222222226222622222222266666222222222222222222
+            22222222222222222222222222222222222222222226222222222222222666222222222222222222
+            22222222222222222222222222222222222222222222222222222222222666222222222222222222
+            22222222222222222222222222222222222222222222222222222222222266622222222222222222
+            22222222222222222222222222222222222222222222222222222222222266622222222222222222
+            22222222222222222222222222222222222222222222222222222222222266666222222222222222
+            22222222222222222222222222222222222222222222222222222222226666666622222222222222
+            22222222222222222222222222222222222222222222222222222222666666666222222222222222
+            22222222222222222222222222222222222222222222222222222222222666222222222222222222
+            22222222222222222222222222222222222222222222222222222222222666222222222222222222
+            22222222222222222222222222222222222222222222222222222222222222222222222222222222
+            22222222222222222222222222222222222222222222222222222222222222222222222222222222
+            22222222222222222222222222222222222222222222222222222222222222222222222222222222
+            22222222222222222222222222222222222222222222222222222222222222222222222222222222
+            22222222222222222222222222222222222222222222222222222222222222222222222222222222
+            22222222222222222222222222222222222222222222222222222266666622222222222222222222
+            `, img`
+            ................................................................................
+            ................................................................................
+            ................................................................................
+            ..............................................................22222.............
+            .............................................................2222222............
+            22...........................................................22222222...........
+            22..........................................................2222222222..........
+            222.......222...222222222...................................2222222222222.....22
+            222.......222222222222222222222222.........................222222222222222222222
+            2222...2222222222222222222222222222222222.................2222222222222222222222
+            22224442222222222222222222222222222222224444444444444444442666622222222222222222
+            22222442222222222222222222222222222222444444444444444444444666662222222222222222
+            22222442222222222222222222222222222224444444444444444444444666662222222222222222
+            66222444222222224444422222222222222244444444444444444444444466666666622222222222
+            66222444444444444444444444444444444444444444444444444444444446666666666662222222
+            66666444444444444444444444444422244444444422222244444444444446666666666666666666
+            66666664444444444444444444222222244442224222222222442222244666666666666666666666
+            66666666444444444444444422222222244442222222222222242222226666666666666666666666
+            66666666644444444444442222222222222222222222222222222222226666222266666666666666
+            66666666644444444466662222222222222222222222222222222222222622222262226666666666
+            66666666666446666666662222222222222222222222222222222222222622222222222226666666
+            66666666666666666666662222222222222222222222222222222222222622222222222222666666
+            66666666666666666666662222222222222222222222222222222226222222222222222222222666
+            22222226666666666666662222222222222222222222222222222266222222222222222222222666
+            22222222222266666666666222222222222222222222222222222222222222222222222222222266
+            22222222222222266666666222222222222222222222222222222222222222222222222222222266
+            22222222222222222666622222222222222222222222222222222222222222222222222222222266
+            22222222222222222226622222222222222222222222222222222222222222222222222222222266
+            22222222222222222222222222222222222222222222222222222222222222222222222222222666
+            22222222222222222222222222222222222222222222222222222222222222222222222222222666
+            22222222222222222222222222222222222222222222222222222222222222222222222222222666
+            22222222222222222222222222222222222222222222222222222222222222222222222222666666
+            22222222222222222222222222222222222222222222222222222222222222222222222222226666
+            22222222222222222222222222222222222222222222222222222222222222222222222222222266
+            22222222222222222222222222222222222222222222222222222222222222222222222222222222
+            22222222222222222222222222222222222222222222222222222222222222222222222222222222
+            22222222222222222222222222222222222222222222222222222222222222222222222222222222
+            22222222222222222222222222222222222222222222222222222222222222222222222222222222
+            22222222222222222222222222222222222222222222222222222222222222222222222222222222
+            22222222222222222222222222222222222222222222222222222222222222222222222222222222
+            22222222222222222222222222222222222222222222222222222222222222222222222222222222
+            22222222222222222222222222222222222222222222222222222222222222222222222222222222
+            22222222222222222222222222222222222222222222222222222222222222222222222222222222
+            22222222222222222222222222222222222222222222222222222222222222222222222222222222
+            22222222222662222222222222222222222222222222222222222222222222222222666666222222
+            22222226666666222222666666666622222222222222222222222222222222222266666666666222
+            66666666666666666666666666666666622222222222222222222222222222222226666666666222
+            66666666666666666666666666666666622222222222222222222222222222222222226666666222
+            66666666666666666666666666666666622222222222222222222222222222222222226666666666
+            66666666666666666666666666666666622222222222222222222222222222222222226666666666
+            `, img`
+            ................................................................................
+            ................................................................................
+            ........................................................22222...................
+            ...........22222222....................................2222222..................
+            .........22222222222.............................22222222222222.................
+            .......2222222222222.........................22222222222222222222222............
+            .22222222222222222222......................22222222222222222222222222...........
+            22222222222222222222222...................222222222222222222222222222222........
+            222222222222222222222222..................222222222222222222222222222222........
+            2222222222222222222222222..............222222222222222222222222222222222........
+            22222222222222222222222222666666666666662222222222222222222222222222222266666622
+            22222222222222222222222222666666666666666622222222222222222222222222222226662222
+            66622222222222222222222222666666666666666662222222222222222222222222222222222222
+            66666622222222222222222222666666666666666666222222222222222666662222222222222222
+            66666662222222222222266666666666666666666666666666666666666666666666662222222222
+            64466666222222666222222222266666666666666666666666666666666666666666622222222222
+            64444666666666666222222222222226666666666666666666666666666666666666222222222222
+            64444662226666222222222222222222266666222226666666666622222666666666222222222222
+            66662222222222222222222222222222262222222222226666622222222262226666222222222222
+            66662222222222222222222222222222222222222222222222222222222222226666222222222222
+            22262222222222222222222222222222222222222222222222222222222222222666662222222222
+            22222222222222222222222222222222222222222222222222222222222222222266662222222222
+            22222222222222222222222222222222222222222222222222222222222222222266662222222222
+            22222222222222222222222222222222222222222222222222222222222222222266666622222222
+            22222222222222222222222222222222222222222222666662222222222222222244444446622222
+            22222222222222222222222222222222222222222222666662222222222222222444444444444222
+            22222222222222222222222222222222222222226666666666666662222222222444444444444446
+            62222222222222222222222222222222226622226666666666666666666644444444444444444444
+            62222222222222222222222222222222226666666666666666666666644444444444444444444444
+            62222222222222222222222222222226666666666666666666644444444444444444444444444444
+            66622222222222222222222226622226666644444444444444444444444444444422222222444444
+            66666222222222222222266666622266666644444442222224444444444444444222222222222222
+            66666662222222222266666666666666666444442222222224442222222222222222222222222222
+            66666666666666666666666666666664444444422222222222222222222222222222222222222222
+            66666666666666666666666444444444444422222222222222222222222222222222222222222222
+            66666666666666666666666444444422222222222222222222222222222222222222222222222222
+            66666666666666446666666442222222222222222222222222222222222222222222222222222222
+            66666666666644446666666422222222222222222222222222222222222222222222222222222222
+            66666664444444446666662222222222222222222222222222222222222222222222222222222222
+            66666222222222222666622222222222222222222222222222222222222222222222222222222222
+            64442222222222222222222222222222222222222222222222222222222222222222222222222222
+            44442222222222222222222222222222222222222222222222222222222222222222222222222222
+            44442222222222222222222222222222222222222222222222222222222222222222222222222222
+            44442222222222222222222222222222222222222222222222222222222222222222222222222222
+            22222222222222222222222222222222222222222222222222222222222222222222222222222222
+            22222222222222222222222222222222222222222222222222222222222222222222222222222222
+            22222222222222222222222222222222222222222222222222222222222222222222222222222222
+            22222222222222222222222222222222222222222222222222222222222222222222222222222222
+            22222222222222222222222222222222222222222222222222222222222222222222222222222222
+            22222222222222222222222222222222222222222222222222222222222222222222222222222222
+            `]
+    }
     placeCave(0)
     placeCeiling(0)
     placeInnerBottom(0)
@@ -31783,177 +32549,352 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.Food, function (sprite, otherSpr
     music.play(music.createSoundEffect(WaveShape.Triangle, 1, 864, 255, 0, 75, SoundExpressionEffect.None, InterpolationCurve.Logarithmic), music.PlaybackMode.InBackground)
 })
 sprites.onOverlap(SpriteKind.Player, SpriteKind.Explosion, function (sprite, otherSprite) {
-    if (!(blocking)) {
-        damageProcessingSystem(sprites.readDataNumber(otherSprite, "ExplosionDamage") * 2)
-    } else {
-        shieldHP += sprites.readDataNumber(otherSprite, "ExplosionDamage") * -1
-    }
+    damageProcessingSystem(sprites.readDataNumber(otherSprite, "ExplosionDamage") * 2)
 })
 function damageProcessingSystem (damage: number) {
-    if (!(invincibilityFrame)) {
-        invincibilityFrame = true
-        if (totalArmor > 0) {
-            health += Math.round(damage * (totalArmor * 0.04)) * -1
-        } else {
-            health += damage * -1
-        }
-        updateSaturationHealthDisplay()
-        if (holdingTrident) {
-            if (netheriteUpgrade) {
-                animation.runImageAnimation(
-                xTear,
-                playerAnimations[4][13],
-                100,
-                false
-                )
-            } else if (diamondSword) {
-                animation.runImageAnimation(
-                xTear,
-                playerAnimations[3][13],
-                100,
-                false
-                )
-            } else if (ironSword) {
-                animation.runImageAnimation(
-                xTear,
-                playerAnimations[2][13],
-                100,
-                false
-                )
-            } else if (GoldSword) {
-                animation.runImageAnimation(
-                xTear,
-                playerAnimations[1][13],
-                100,
-                false
-                )
+    if (damage > 0) {
+        if (!(invincibilityFrame)) {
+            invincibilityFrame = true
+            if (blocking) {
+                shieldHP += damage * -1
+                music.play(music.createSoundEffect(WaveShape.Noise, 746, 301, 255, 0, 200, SoundExpressionEffect.Warble, InterpolationCurve.Linear), music.PlaybackMode.InBackground)
+                scene.cameraShake(3, 50)
             } else {
-                animation.runImageAnimation(
-                xTear,
-                playerAnimations[0][13],
-                100,
-                false
-                )
-            }
-        } else {
-            if (netheriteUpgrade) {
-                animation.runImageAnimation(
-                xTear,
-                playerAnimations[4][5],
-                100,
-                false
-                )
-            } else if (diamondSword) {
-                animation.runImageAnimation(
-                xTear,
-                playerAnimations[3][5],
-                100,
-                false
-                )
-            } else if (ironSword) {
-                animation.runImageAnimation(
-                xTear,
-                playerAnimations[2][5],
-                100,
-                false
-                )
-            } else if (GoldSword) {
-                animation.runImageAnimation(
-                xTear,
-                playerAnimations[1][5],
-                100,
-                false
-                )
-            } else {
-                animation.runImageAnimation(
-                xTear,
-                playerAnimations[0][5],
-                100,
-                false
-                )
-            }
-        }
-        scene.cameraShake(4, 100)
-        timer.after(150, function () {
-            if (holdingTrident) {
-                if (netheriteUpgrade) {
-                    animation.runImageAnimation(
-                    xTear,
-                    playerAnimations[4][11],
-                    100,
-                    true
-                    )
-                } else if (diamondSword) {
-                    animation.runImageAnimation(
-                    xTear,
-                    playerAnimations[3][11],
-                    100,
-                    true
-                    )
-                } else if (ironSword) {
-                    animation.runImageAnimation(
-                    xTear,
-                    playerAnimations[2][11],
-                    100,
-                    true
-                    )
-                } else if (GoldSword) {
-                    animation.runImageAnimation(
-                    xTear,
-                    playerAnimations[1][11],
-                    100,
-                    true
-                    )
+                if (totalArmor > 0) {
+                    health += parseFloat(convertToText(spriteutils.roundWithPrecision(damage * (1 - totalArmor * 0.04) * -1, 2)))
                 } else {
-                    animation.runImageAnimation(
-                    xTear,
-                    playerAnimations[0][11],
-                    100,
-                    true
-                    )
+                    health += parseFloat(convertToText(spriteutils.roundWithPrecision(damage * -1, 2)))
                 }
-            } else {
-                if (netheriteUpgrade) {
-                    animation.runImageAnimation(
-                    xTear,
-                    playerAnimations[4][1],
-                    175,
-                    true
-                    )
-                } else if (diamondSword) {
-                    animation.runImageAnimation(
-                    xTear,
-                    playerAnimations[3][1],
-                    175,
-                    true
-                    )
-                } else if (ironSword) {
-                    animation.runImageAnimation(
-                    xTear,
-                    playerAnimations[2][1],
-                    175,
-                    true
-                    )
-                } else if (GoldSword) {
-                    animation.runImageAnimation(
-                    xTear,
-                    playerAnimations[1][1],
-                    175,
-                    true
-                    )
+                music.play(music.createSoundEffect(WaveShape.Square, 200, 1, 255, 0, 100, SoundExpressionEffect.None, InterpolationCurve.Curve), music.PlaybackMode.InBackground)
+                scene.cameraShake(4, 50)
+                updateSaturationHealthDisplay()
+                if (holdingTrident) {
+                    if (netheriteUpgrade) {
+                        animation.runImageAnimation(
+                        xTear,
+                        playerAnimations[4][13],
+                        100,
+                        false
+                        )
+                    } else if (diamondSword) {
+                        animation.runImageAnimation(
+                        xTear,
+                        playerAnimations[3][13],
+                        100,
+                        false
+                        )
+                    } else if (ironSword) {
+                        animation.runImageAnimation(
+                        xTear,
+                        playerAnimations[2][13],
+                        100,
+                        false
+                        )
+                    } else if (GoldSword) {
+                        animation.runImageAnimation(
+                        xTear,
+                        playerAnimations[1][13],
+                        100,
+                        false
+                        )
+                    } else {
+                        animation.runImageAnimation(
+                        xTear,
+                        playerAnimations[0][13],
+                        100,
+                        false
+                        )
+                    }
                 } else {
-                    animation.runImageAnimation(
-                    xTear,
-                    playerAnimations[0][1],
-                    175,
-                    true
-                    )
+                    if (netheriteUpgrade) {
+                        animation.runImageAnimation(
+                        xTear,
+                        playerAnimations[4][5],
+                        100,
+                        false
+                        )
+                    } else if (diamondSword) {
+                        animation.runImageAnimation(
+                        xTear,
+                        playerAnimations[3][5],
+                        100,
+                        false
+                        )
+                    } else if (ironSword) {
+                        animation.runImageAnimation(
+                        xTear,
+                        playerAnimations[2][5],
+                        100,
+                        false
+                        )
+                    } else if (GoldSword) {
+                        animation.runImageAnimation(
+                        xTear,
+                        playerAnimations[1][5],
+                        100,
+                        false
+                        )
+                    } else {
+                        animation.runImageAnimation(
+                        xTear,
+                        playerAnimations[0][5],
+                        100,
+                        false
+                        )
+                    }
                 }
+                scene.cameraShake(4, 100)
+                timer.after(150, function () {
+                    if (holdingTrident) {
+                        if (netheriteUpgrade) {
+                            animation.runImageAnimation(
+                            xTear,
+                            playerAnimations[4][11],
+                            100,
+                            true
+                            )
+                        } else if (diamondSword) {
+                            animation.runImageAnimation(
+                            xTear,
+                            playerAnimations[3][11],
+                            100,
+                            true
+                            )
+                        } else if (ironSword) {
+                            animation.runImageAnimation(
+                            xTear,
+                            playerAnimations[2][11],
+                            100,
+                            true
+                            )
+                        } else if (GoldSword) {
+                            animation.runImageAnimation(
+                            xTear,
+                            playerAnimations[1][11],
+                            100,
+                            true
+                            )
+                        } else {
+                            animation.runImageAnimation(
+                            xTear,
+                            playerAnimations[0][11],
+                            100,
+                            true
+                            )
+                        }
+                    } else {
+                        if (netheriteUpgrade) {
+                            animation.runImageAnimation(
+                            xTear,
+                            playerAnimations[4][1],
+                            175,
+                            true
+                            )
+                        } else if (diamondSword) {
+                            animation.runImageAnimation(
+                            xTear,
+                            playerAnimations[3][1],
+                            175,
+                            true
+                            )
+                        } else if (ironSword) {
+                            animation.runImageAnimation(
+                            xTear,
+                            playerAnimations[2][1],
+                            175,
+                            true
+                            )
+                        } else if (GoldSword) {
+                            animation.runImageAnimation(
+                            xTear,
+                            playerAnimations[1][1],
+                            175,
+                            true
+                            )
+                        } else {
+                            animation.runImageAnimation(
+                            xTear,
+                            playerAnimations[0][1],
+                            175,
+                            true
+                            )
+                        }
+                    }
+                })
             }
-            timer.after(100, function () {
-                invincibilityFrame = false
-            })
+        }
+        timer.after(200, function () {
+            invincibilityFrame = false
         })
+    }
+    if (health <= 0) {
+        game.setDialogFrame(img`
+            c c c c c c c c c c c c c c c 
+            c 2 2 2 2 2 2 2 2 2 2 2 2 2 c 
+            c 2 c c c c c c c c c c c 2 c 
+            c 2 c 3 c 3 3 3 3 3 c 3 c 2 c 
+            c 2 c c 3 c c c c c 3 c c 2 c 
+            c 2 c 3 c c c c c c c 3 c 2 c 
+            c 2 c 3 c c c c c c c 3 c 2 c 
+            c 2 c 3 c c c c c c c 3 c 2 c 
+            c 2 c 3 c c c c c c c 3 c 2 c 
+            c 2 c 3 c c c c c c c 3 c 2 c 
+            c 2 c c 3 c c c c c 3 c c 2 c 
+            c 2 c 3 c 3 3 3 3 3 c 3 c 2 c 
+            c 2 c c c c c c c c c c c 2 c 
+            c 2 2 2 2 2 2 2 2 2 2 2 2 2 c 
+            c c c c c c c c c c c c c c c 
+            `)
+        if (Math.percentChance(25)) {
+            game.setDialogCursor(img`
+                ..............................
+                ..............................
+                ..............................
+                ..............................
+                ..............................
+                ..............................
+                ...........ffffffff...........
+                .........ff11111111ff.........
+                ........f111111111111f........
+                ........f111111111111f........
+                .......f11fff1111fff11f.......
+                .......f1ffff1111ffff1f.......
+                .......f1ffff1111ffff1f.......
+                .......f1ffff1111ffff1f.......
+                .......f1fff71ff17fff1f.......
+                .......f111771ff177111f.......
+                .......f11177111197111f.......
+                ........fff77111197fff........
+                ..........f97111197f..........
+                ..........f971ff177f..........
+                ..........f971ff177f..........
+                ...........97ffff79...........
+                ........7799777777977.........
+                ......77777777779999777.......
+                .....7779999777777777777......
+                ......77777777999779777.......
+                ........7777777777777.........
+                ..............................
+                ..............................
+                ..............................
+                `)
+        } else if (Math.percentChance(25)) {
+            game.setDialogCursor(img`
+                ..............................
+                ...............2..............
+                ...............2..............
+                ..............................
+                ......2..................2....
+                ......22.....22222......22....
+                ...........ffff2fffff.........
+                .........ff111fff1111ff.......
+                ........f111ffff1111111f......
+                ........f11111fff111111f......
+                .......f111ff11fff1ff111f.....
+                .......f11fff1ffff1ff111f.....
+                ...222.f11fffffff11fff11f.222.
+                .......f11fff1fff11fff11f.....
+                .......f11ff11ffff11ff11f.....
+                .......f11111ff2ff111111f.....
+                .......f1111ff22ff111111f.....
+                ........fff1ff22ff111fff......
+                ..........f11f2ff1f11f........
+                ......2...f1ff22ff1f1f...2....
+                .....2....f1f2f22f1f1f....2...
+                ...........ff2f.2ffff.........
+                .............22.2.............
+                .............2..2.............
+                .............2................
+                ..............................
+                ..............................
+                ..............................
+                ..............................
+                ..............................
+                `)
+        } else if (Math.percentChance(25)) {
+            game.setDialogCursor(img`
+                ..............................
+                .............cc...............
+                ............caac..............
+                ............caac..............
+                .............cc...............
+                ..........2..ee..2............
+                ..........2..dd..2............
+                .......2.....ee.....2.........
+                ........2..ccddcc..2..........
+                ..........cccccccc............
+                ......22....abba....22........
+                ...........ffbbafff...........
+                .........ff1fbbaf21ff.........
+                ........f1f122bf1111ff........
+                ........f111122211111f........
+                .......f111111f2111111f.......
+                .......f11f1f1121f1f11f.......
+                .......f111f111211f111f.......
+                .......f11f1f1111f1f11f.......
+                .......f111111ff111111f.......
+                .......f11111ffff11111f.......
+                .......f11111ffff11111f.......
+                ........fff11111111fff........
+                ..........f11111111f..........
+                ..........f1f1ff1f1f..........
+                ..........f1f1ff1f1f..........
+                ...........ffffffff...........
+                ..............................
+                ..............................
+                ..............................
+                `)
+        } else {
+            game.setDialogCursor(img`
+                ..............................
+                .........................5....
+                ............55544....55.......
+                ...........555444..5555..2....
+                ...........55442..5555..42....
+                .......5..55542225555..422....
+                ......55..5ffffffff55.4224....
+                .........ff11111111ff44224....
+                ........f111111111111f2224....
+                ........f111111111111f2224....
+                .......f111ff1111ff111f224....
+                .......f11fff1111fff11f22.....
+                .......f11fff1111fff11f2......
+                .......f11fff1111fff11f2......
+                ......5f11ff11ff14ff11f..2....
+                ......5f111111f4441111f2.2....
+                .....55f11111144441111f2......
+                .....554fff11144444fff22......
+                .....55444f11444244f4222......
+                ......5544f1444224442222......
+                ......5554f4442224442222......
+                .......5544444222442222.......
+                ........5544422222222.........
+                ..............................
+                ..............................
+                ..............................
+                ..............................
+                ..............................
+                ..............................
+                ..............................
+                `)
+        }
+        game.setDialogTextColor(1)
+        if (Math.percentChance(20)) {
+            game.setGameOverMessage(false, "WHAT A FAILURE")
+        } else if (Math.percentChance(20)) {
+            game.setGameOverMessage(false, "DIDN'T KNOW YOU WERE A LOSER")
+        } else if (Math.percentChance(20)) {
+            game.setGameOverMessage(false, "SO MUCH FOR BEING A HERO")
+        } else if (Math.percentChance(20)) {
+            game.setGameOverMessage(false, "EMBARASSING.")
+        } else if (Math.percentChance(20)) {
+            game.setGameOverMessage(false, "MAYBE TRY HARDER?")
+        } else {
+            game.setGameOverMessage(false, "NEWS FLASH, YOU DIED.")
+        }
+        game.setGameOverPlayable(false, music.melodyPlayable(music.bigCrash), false)
+        game.gameOver(false)
+        music.stopAllSounds()
     }
     return damage
 }
@@ -32143,16 +33084,10 @@ function mobRunGhast (Ghast: Sprite) {
         })
     })
 }
-let randomFood = 0
 let LaserImpact: Sprite = null
 let OrbitalLaserDisplay: Sprite = null
 let OrbitalLaserRaytrace: Image = null
 let OrbitalLaser = false
-let cookie: Sprite = null
-let goldenapple: Sprite = null
-let cake: Sprite = null
-let goldencarrot: Sprite = null
-let apple: Sprite = null
 let playerArrowDistance = 0
 let playerArrowDY = 0
 let playerArrowDX = 0
@@ -32165,6 +33100,7 @@ let chargeDot: Sprite = null
 let playerBow: Sprite = null
 let saveSprite: Sprite = null
 let storedArmorDrop = 0
+let invincibilityFrame = false
 let saveSystemTrip = false
 let EndPillar: Sprite = null
 let End_Crystal: Sprite = null
@@ -32176,9 +33112,14 @@ let TridentAttack = false
 let upButtonPressed = false
 let deleteSystemTrip = false
 let angle = 0
-let MobsKilledOverall = 0
+let ArmorFoundLevel = 0
 let LevelStatsText: TextSprite = null
 let StatBlockSprite: Sprite = null
+let cookie: Sprite = null
+let goldenapple: Sprite = null
+let goldencarrot: Sprite = null
+let cake: Sprite = null
+let apple: Sprite = null
 let lastCreatedTopInner: Sprite = null
 let lastCreatedBottomInner: Sprite = null
 let UpperCaveUnderlay: Image[] = []
@@ -32197,11 +33138,7 @@ let iron_boots: Sprite = null
 let iron_leggings: Sprite = null
 let iron_chestplate: Sprite = null
 let iron_helmet: Sprite = null
-let ArmorFoundLevel = 0
-let Experience = 0
-let MobsKilledLevel = 0
-let playingLevel = false
-let MobsMissed = 0
+let isMobRemaining = false
 let arrowFunctionOut = 0
 let factor = 0
 let clampedPower = 0
@@ -32222,10 +33159,10 @@ let petAllayIntellisense = false
 let specialDebris: Image[] = []
 let debrisArray: Image[] = []
 let debris: Sprite = null
+let mapSelection = 0
 let saveSelectorSprite: Sprite = null
 let saveSelection = 0
 let saveMenu = false
-let mapSelection = 0
 let RNGroll = 0
 let LootChestAnimations: Image[][] = []
 let LootChestFallingSprites: Image[] = []
@@ -32245,6 +33182,7 @@ let deltaX = 0
 let petAllay: Sprite = null
 let boolUnlockStringRead = ""
 let specialLootSprites: Image[][] = []
+let playingLevel = false
 let fallingTNT: Sprite = null
 let gamemodeSystem = 0
 let Dimension = 0
@@ -32253,10 +33191,12 @@ let walksintoscreen: Sprite = null
 let MenuSplash: TextSprite = null
 let pressAToStart: Sprite = null
 let Logo: Sprite = null
+let MobsKilledLevel = 0
 let mobHealth: number[][] = []
 let mobHurt: Image[][][] = []
 let BottomCaveOverlay: Image[] = []
 let lastCreatedCave: Sprite = null
+let delayMap = false
 let commandBlocks = 0
 let LootRollSprite: Sprite = null
 let mobAnimationSpeed: number[][] = []
@@ -32281,7 +33221,7 @@ let beam1Coords: Sprite = null
 let witherStormEyeTracedSprite: Sprite = null
 let witherstormSprite: Sprite = null
 let witherStormActive = false
-let invincibilityFrame = false
+let blocking = false
 let canCrit = false
 let holdingTrident = false
 let witherStormEyeTrace: Image = null
@@ -32301,7 +33241,6 @@ let EyesCollected = 0
 let WitherSkulls = 0
 let commandBlocksAvailable = 0
 let End = false
-let blocking = false
 let attack = 0
 let netheriteUpgrade = false
 let swordDamage = 0
@@ -32354,6 +33293,7 @@ let levelUnlocked = 0
 let skipIntro = false
 skipIntro = true
 Load()
+spriteutils.setConsoleOverlay(true)
 game.onUpdateInterval(600, function () {
     if (End == false) {
         for (let value of sprites.allOfKind(SpriteKind.InnerTop)) {
@@ -32372,33 +33312,44 @@ game.onUpdateInterval(600, function () {
         }
     }
 })
-forever(function () {
-    if (showWitherBeam) {
-        for (let debris of sprites.allOfKind(SpriteKind.debris)) {
-            debris.setScale(debris.lifespan / 1800, ScaleAnchor.Middle)
-        }
-    }
-})
 game.onUpdateInterval(350, function () {
-    if (End == false) {
-        for (let value of sprites.allOfKind(SpriteKind.Ceilings)) {
-            value.x += -2
+    if (runGame) {
+        if (End == false) {
+            for (let value of sprites.allOfKind(SpriteKind.Ceilings)) {
+                value.x += -2
+            }
+            if (lastCreatedCeiling.right < scene.screenWidth() + 40) {
+                placeCeiling(lastCreatedCeiling.right)
+            }
         }
-        if (lastCreatedCeiling.right < scene.screenWidth() + 40) {
-            placeCeiling(lastCreatedCeiling.right)
-        }
-    }
-    if (End == false) {
-        for (let value of sprites.allOfKind(SpriteKind.Caves)) {
-            value.x += -2
-        }
-        if (lastCreatedCave.right < scene.screenWidth() + 40) {
-            placeCave(lastCreatedCave.right)
+        if (End == false) {
+            for (let value of sprites.allOfKind(SpriteKind.Caves)) {
+                value.x += -2
+            }
+            if (lastCreatedCave.right < scene.screenWidth() + 40) {
+                placeCave(lastCreatedCave.right)
+            }
         }
     }
 })
 forever(function () {
     if (runGame) {
+        if (shieldHP <= 0 && !(BedrockShield)) {
+            sprites.destroy(shield)
+            blocking = false
+        }
+        if (blocking == true) {
+            if (BedrockShield) {
+                shield.y = xTear.y + 1
+                shield.x = xTear.x + 3
+            } else {
+                shield.y = xTear.y + 1
+                shield.x = xTear.x + 2
+            }
+        } else {
+            shield.y = xTear.y
+            shield.x = 250
+        }
         if (aiming) {
             playerBow.y = xTear.y
         } else {
@@ -32410,8 +33361,6 @@ forever(function () {
                 sprites.destroy(playerArrow)
             }
         }
-    }
-    if (runGame) {
         if (inair == 1) {
             xTear.vy += 6.5
             timer.after(600, function () {
@@ -32426,59 +33375,110 @@ forever(function () {
         if (xTearLeapingGravity) {
             xTearLeapingSprite.vy += 6.5
         }
+        if (showWitherBeam) {
+            for (let debris of sprites.allOfKind(SpriteKind.debris)) {
+                debris.setScale(debris.lifespan / 1800, ScaleAnchor.Middle)
+            }
+        }
     }
 })
 game.onUpdateInterval(1600, function () {
-    if (DoubleHealth) {
-        if (saturation > 7 && health < 40) {
-            saturation += -1
-            health += 1
-            updateSaturationHealthDisplay()
-        }
-    } else {
-        if (saturation > 7 && health < 20) {
-            saturation += -1
-            health += 1
-            updateSaturationHealthDisplay()
+    if (runGame) {
+        if (DoubleHealth) {
+            if (saturation > 7 && health < 40) {
+                saturation += -1
+                health += 1
+                updateSaturationHealthDisplay()
+            }
+        } else {
+            if (saturation > 7 && health < 20) {
+                saturation += -1
+                health += 1
+                updateSaturationHealthDisplay()
+            }
         }
     }
 })
 game.onUpdateInterval(800, function () {
-    if (witherStormActive) {
-        animation.runImageAnimation(
-        witherstormSprite,
-        mobAnimation[1][23],
-        100,
-        false
-        )
-        timer.after(300, function () {
-            if (witherStormActive) {
-                eye1Y += 1
-                eye2Y += 1
-                eye3Y += 1
+    if (runGame) {
+        if (witherStormActive) {
+            animation.runImageAnimation(
+            witherstormSprite,
+            mobAnimation[1][23],
+            100,
+            false
+            )
+            timer.after(300, function () {
+                if (witherStormActive) {
+                    eye1Y += 1
+                    eye2Y += 1
+                    eye3Y += 1
+                }
+            })
+            timer.after(500, function () {
+                if (witherStormActive) {
+                    eye1Y += 1
+                    eye2Y += 1
+                    eye3Y += 1
+                }
+            })
+            timer.after(600, function () {
+                if (witherStormActive) {
+                    eye1Y += -1
+                    eye2Y += -1
+                    eye3Y += -1
+                }
+            })
+            timer.after(800, function () {
+                if (witherStormActive) {
+                    eye1Y += -1
+                    eye2Y += -1
+                    eye3Y += -1
+                }
+            })
+        }
+    }
+})
+game.onUpdateInterval(2000, function () {
+    if (runGame) {
+        if (witherStormActive) {
+            if (witherBeamPathing) {
+                timer.background(function () {
+                    beam1Coords.vx = randint(-50, 50)
+                    beam1Coords.vy = randint(-50, 50)
+                    if (beam1Coords.x > -150) {
+                        beam1Coords.vx = randint(-90, -100)
+                    }
+                    if (beam1Coords.x < -350) {
+                        beam1Coords.vx = randint(70, 85)
+                    }
+                    if (beam1Coords.y > 240) {
+                        beam1Coords.vy = randint(-40, -50)
+                    }
+                    if (beam1Coords.y < -50) {
+                        beam1Coords.vy = randint(70, 80)
+                    }
+                })
+                timer.background(function () {
+                    beam2Coords.vx = randint(-50, 50)
+                    if (beam2Coords.x > 200) {
+                        beam2Coords.vx = randint(-50, -60)
+                    }
+                    if (beam2Coords.x < -35) {
+                        beam2Coords.vx = randint(50, 60)
+                    }
+                })
+                timer.background(function () {
+                    beam3Coords.vy = randint(-50, 50)
+                    if (beam3Coords.y > 190) {
+                        beam3Coords.vy = randint(-50, -70)
+                    }
+                    if (beam3Coords.y < -75) {
+                        beam3Coords.vy = randint(50, 70)
+                    }
+                })
             }
-        })
-        timer.after(500, function () {
-            if (witherStormActive) {
-                eye1Y += 1
-                eye2Y += 1
-                eye3Y += 1
-            }
-        })
-        timer.after(600, function () {
-            if (witherStormActive) {
-                eye1Y += -1
-                eye2Y += -1
-                eye3Y += -1
-            }
-        })
-        timer.after(800, function () {
-            if (witherStormActive) {
-                eye1Y += -1
-                eye2Y += -1
-                eye3Y += -1
-            }
-        })
+        }
     }
 })
 game.onUpdateInterval(2000, function () {
@@ -32692,361 +33692,50 @@ game.onUpdateInterval(2000, function () {
         }
     }
 })
-game.onUpdateInterval(2000, function () {
-    if (witherStormActive) {
-        if (witherBeamPathing) {
-            timer.background(function () {
-                beam1Coords.vx = randint(-50, 50)
-                beam1Coords.vy = randint(-50, 50)
-                if (beam1Coords.x > -150) {
-                    beam1Coords.vx = randint(-90, -100)
-                }
-                if (beam1Coords.x < -350) {
-                    beam1Coords.vx = randint(70, 85)
-                }
-                if (beam1Coords.y > 240) {
-                    beam1Coords.vy = randint(-40, -50)
-                }
-                if (beam1Coords.y < -50) {
-                    beam1Coords.vy = randint(70, 80)
-                }
-            })
-            timer.background(function () {
-                beam2Coords.vx = randint(-50, 50)
-                if (beam2Coords.x > 200) {
-                    beam2Coords.vx = randint(-50, -60)
-                }
-                if (beam2Coords.x < -35) {
-                    beam2Coords.vx = randint(50, 60)
-                }
-            })
-            timer.background(function () {
-                beam3Coords.vy = randint(-50, 50)
-                if (beam3Coords.y > 190) {
-                    beam3Coords.vy = randint(-50, -70)
-                }
-                if (beam3Coords.y < -75) {
-                    beam3Coords.vy = randint(50, 70)
-                }
-            })
+game.onUpdateInterval(5000, function () {
+    if (runGame) {
+        trySpawnFood(randint(1, 5))
+        if (DoubleHealth) {
+            if (saturation > 7 && health < 40) {
+                saturation += -1
+                health += 1
+                updateSaturationHealthDisplay()
+            }
+        } else {
+            if (saturation > 7 && health < 20) {
+                saturation += -1
+                health += 1
+                updateSaturationHealthDisplay()
+            }
         }
     }
 })
-game.onUpdateInterval(5000, function () {
-    if (DoubleHealth) {
-        if (saturation > 7 && health < 40) {
-            saturation += -1
-            health += 1
-            updateSaturationHealthDisplay()
-        }
-    } else {
-        if (saturation > 7 && health < 20) {
-            saturation += -1
-            health += 1
-            updateSaturationHealthDisplay()
+forever(function () {
+    if (runGame) {
+        if (sprites.allOfKind(SpriteKind.mob).length > 0) {
+            isMobRemaining = true
+        } else {
+            isMobRemaining = false
         }
     }
 })
-game.onUpdateInterval(5000, function () {
-    randomFood = randint(1, 5)
-    if (saturation < 20) {
-        if (randomFood == 1) {
-            apple = sprites.createProjectileFromSide(img`
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                `, -25, 0)
-            apple.setKind(SpriteKind.Food)
-            tiles.placeOnTile(apple, tiles.getTileLocation(12, 14))
-            apple.setScale(0.75, ScaleAnchor.Bottom)
-            animation.runImageAnimation(
-            apple,
-            [img`
-                . . . . . . . . . d e . . . . . 
-                . . . . . . . . d e . . . . . . 
-                . . . . . . . . d e . . . . . . 
-                . . . . e e e d d e e . . . . . 
-                . . e e 1 1 2 2 e 2 3 e e . . . 
-                . e 2 3 3 1 1 1 1 3 3 3 3 e e . 
-                . e 2 3 3 3 3 3 3 3 3 3 3 2 e e 
-                . e 2 3 3 3 3 3 3 3 3 2 2 2 2 e 
-                . e 2 2 2 3 3 3 2 2 2 2 2 2 3 e 
-                . e 2 2 2 2 2 2 2 2 2 2 2 3 3 e 
-                . d 2 2 2 2 2 2 2 2 2 2 2 3 3 e 
-                . d 2 2 2 2 2 2 2 2 2 2 2 3 3 e 
-                . . d 2 2 2 2 2 2 2 2 2 3 3 e . 
-                . . d 2 2 2 2 2 2 2 2 2 3 3 e . 
-                . . . e 2 2 2 2 2 2 2 3 3 e . . 
-                . . . . e e d d e e e e e . . . 
-                `,img`
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . d e . . . . . 
-                . . . . . . . . d e . . . . . . 
-                . . . . . . . . d e . . . . . . 
-                . . . . e e e d d e e . . . . . 
-                . . e e 1 1 2 2 e 2 3 e e . . . 
-                . e 2 3 3 1 1 1 1 3 3 3 3 e e . 
-                . e 2 3 3 3 3 3 3 3 3 3 3 2 e e 
-                . e 2 3 3 3 3 3 3 3 3 2 2 2 2 e 
-                . e 2 2 2 3 3 3 2 2 2 2 2 2 3 e 
-                . e 2 2 2 2 2 2 2 2 2 2 2 3 3 e 
-                . d 2 2 2 2 2 2 2 2 2 2 2 3 3 e 
-                . . d 2 2 2 2 2 2 2 2 2 3 3 e . 
-                . . d 2 2 2 2 2 2 2 2 2 3 3 e . 
-                . . . e 2 2 2 2 2 2 2 3 3 e . . 
-                . . . . e e d d e e e e e . . . 
-                `],
-            500,
-            true
-            )
-        }
-        if (randomFood == 2) {
-            cake = sprites.createProjectileFromSide(img`
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                `, -25, 0)
-            cake.setKind(SpriteKind.Food)
-            tiles.placeOnTile(cake, tiles.getTileLocation(12, 14))
-            cake.setScale(0.75, ScaleAnchor.Bottom)
-            animation.runImageAnimation(
-            cake,
-            [img`
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . 1 1 1 1 1 1 1 1 . . . . 
-                . . 1 1 1 1 1 1 1 1 1 3 1 1 . . 
-                . 1 1 1 3 1 1 1 1 1 1 1 1 1 1 . 
-                1 1 1 1 1 1 1 2 2 1 1 1 1 1 1 1 
-                1 1 1 1 1 1 2 2 2 2 1 1 1 1 3 1 
-                1 3 1 1 1 1 1 2 2 1 1 1 1 1 1 1 
-                1 1 1 1 1 1 1 1 1 1 1 1 3 1 1 1 
-                e 1 1 1 3 1 1 1 1 1 1 1 1 1 1 e 
-                e d 1 1 1 1 1 1 1 1 1 1 1 1 d e 
-                e d d d 1 1 1 1 1 1 1 1 d d d e 
-                e d d d 1 d d d d d 1 d d d d e 
-                . e d d d d d d d d d d d d e . 
-                . . e e d d d d d d d d e e . . 
-                . . . . e e e e e e e e . . . . 
-                `,img`
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . 1 1 1 1 1 1 1 1 . . . . 
-                . . 1 1 1 1 1 1 1 1 1 3 1 1 . . 
-                . 1 1 1 3 1 1 1 1 1 1 1 1 1 1 . 
-                1 1 1 1 1 1 1 2 2 1 1 1 1 1 1 1 
-                1 1 1 1 1 1 2 2 2 2 1 1 1 1 3 1 
-                1 3 1 1 1 1 1 2 2 1 1 1 1 1 1 1 
-                1 1 1 1 1 1 1 1 1 1 1 1 3 1 1 1 
-                e 1 1 1 3 1 1 1 1 1 1 1 1 1 1 e 
-                e d 1 1 1 1 1 1 1 1 1 1 1 1 d e 
-                e d d 1 1 1 1 1 1 1 1 1 1 d d e 
-                . e d d 1 d d d d d 1 d d d e . 
-                . . e e d d d d d d d d e e . . 
-                . . . . e e e e e e e e . . . . 
-                `],
-            500,
-            true
-            )
-        }
-        if (randomFood == 3) {
-            goldencarrot = sprites.createProjectileFromSide(img`
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                `, -25, 0)
-            goldencarrot.setKind(SpriteKind.Food)
-            tiles.placeOnTile(goldencarrot, tiles.getTileLocation(12, 14))
-            goldencarrot.setScale(0.75, ScaleAnchor.Bottom)
-            animation.runImageAnimation(
-            goldencarrot,
-            [img`
-                . . . . . . . d . e e e . . . . 
-                . . . . . e e e d e d e e . e e 
-                . . . . d d e e d d e e e d d e 
-                . . . e e e d e d e e e d d e e 
-                . . . . . e e e 1 e e d d e e . 
-                . . . . . d 1 1 1 1 4 e d e d d 
-                . . . . d 1 1 1 1 4 4 4 e e e d 
-                . . . . d 1 1 1 4 4 4 4 4 e e e 
-                . . . d 1 1 1 1 4 4 4 4 4 e e e 
-                . . . d 1 1 1 4 4 4 4 4 e e d d 
-                . . d 1 1 4 4 4 4 4 e e e e d . 
-                . . d 1 1 4 4 4 e e e . . e . . 
-                . d 1 1 4 4 e e e . . . . . . . 
-                . d 1 4 e e e . . . . . . . . . 
-                d 1 e e e . . . . . . . . . . . 
-                d e e . . . . . . . . . . . . . 
-                `,img`
-                . . . . . . . . . . . . . . . . 
-                . . . . . . d . e e e . . . . . 
-                . . . . e e e d e d e e . e e . 
-                . . . d d e e d d e e e d d e . 
-                . . e e e d e d e e e d d e e . 
-                . . . . e e e 1 e e d d e e . . 
-                . . . . d 1 1 1 1 4 e d e d d . 
-                . . . d 1 1 1 1 4 4 4 e e e d . 
-                . . . d 1 1 1 4 4 4 4 4 e e e . 
-                . . d 1 1 1 1 4 4 4 4 4 e e e . 
-                . . d 1 1 1 4 4 4 4 4 e e d d . 
-                . d 1 1 4 4 4 4 4 e e e e d . . 
-                . d 1 1 4 4 4 e e e . . e . . . 
-                . d 1 4 e e e . . . . . . . . . 
-                d 1 e e e . . . . . . . . . . . 
-                d e e . . . . . . . . . . . . . 
-                `],
-            500,
-            true
-            )
-        }
-        if (randomFood == 4) {
-            goldenapple = sprites.createProjectileFromSide(img`
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                `, -25, 0)
-            goldenapple.setKind(SpriteKind.Food)
-            tiles.placeOnTile(goldenapple, tiles.getTileLocation(12, 14))
-            goldenapple.setScale(0.75, ScaleAnchor.Bottom)
-            animation.runImageAnimation(
-            goldenapple,
-            [img`
-                . . . . . . . . . d e . . . . . 
-                . . . . . . . . d e . . . . . . 
-                . . . . . . . . d e . . . . . . 
-                . . . . e e e d d e e . . . . . 
-                . . e e 1 1 4 4 e 4 5 e e . . . 
-                . e 4 5 5 1 1 1 1 5 5 5 5 e e . 
-                . e 4 5 5 5 5 5 5 5 5 5 5 4 e e 
-                . e 4 5 5 5 5 5 5 5 5 4 4 4 4 e 
-                . e 4 4 4 5 5 5 4 4 4 4 4 4 5 e 
-                . e 4 4 4 4 4 4 4 4 4 4 4 5 5 e 
-                . d 4 4 4 4 4 4 4 4 4 4 4 5 5 e 
-                . d 4 4 4 4 4 4 4 4 4 4 4 5 5 e 
-                . . d 4 4 4 4 4 4 4 4 4 5 5 e . 
-                . . d 4 4 4 4 4 4 4 4 4 5 5 e . 
-                . . . e 4 4 4 4 4 4 4 5 5 e . . 
-                . . . . e e d d e e e e e . . . 
-                `,img`
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . d e . . . . . 
-                . . . . . . . . d e . . . . . . 
-                . . . . . . . . d e . . . . . . 
-                . . . . e e e d d e e . . . . . 
-                . . e e 1 1 4 4 e 4 5 e e . . . 
-                . e 4 5 5 1 1 1 1 5 5 5 5 e e . 
-                . e 4 5 5 5 5 5 5 5 5 5 5 4 e e 
-                . e 4 5 5 5 5 5 5 5 5 4 4 4 4 e 
-                . e 4 4 4 5 5 5 4 4 4 4 4 4 5 e 
-                . e 4 4 4 4 4 4 4 4 4 4 4 5 5 e 
-                . d 4 4 4 4 4 4 4 4 4 4 4 5 5 e 
-                . . d 4 4 4 4 4 4 4 4 4 5 5 e . 
-                . . d 4 4 4 4 4 4 4 4 4 5 5 e . 
-                . . . e 4 4 4 4 4 4 4 5 5 e . . 
-                . . . . e e d d e e e e e . . . 
-                `],
-            500,
-            true
-            )
-        }
-        if (randomFood == 5) {
-            cookie = sprites.createProjectileFromSide(img`
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                `, -25, 0)
-            cookie.setKind(SpriteKind.Food)
-            tiles.placeOnTile(cookie, tiles.getTileLocation(12, 14))
-            cookie.setScale(0.75, ScaleAnchor.Bottom)
-            animation.runImageAnimation(
-            cookie,
-            [img`
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . e e e e e e e . . . . . 
-                . . e e c d d d d d d e e . . . 
-                . e d d d d d d d d c d d e . . 
-                . e d d c c d d d d c c d e . . 
-                e d d d c d d c c d d d d d e . 
-                c d d d d d d c c d d d c d e . 
-                e d c c d d d d d d d d d d e . 
-                e d c c d d d d d d d d d d e . 
-                e d d d d d d d d d c c d d e . 
-                . e d d d c c d d d c d d e . . 
-                . e d d d c c d d d d d d e . . 
-                . . e e d d d d d d d e e . . . 
-                . . . . e e e e e e e . . . . . 
-                `],
-            500,
-            true
-            )
+game.onUpdateInterval(20, function () {
+    if (runGame) {
+        if (witherStormActive) {
+            if (showWitherBeam) {
+                drawEyeBeam(eye1X, eye1Y, beam1Coords)
+                if (Math.percentChance(5)) {
+                    beamDebris(beam1Coords)
+                }
+                drawEyeBeam(eye2X, eye2Y, beam2Coords)
+                if (Math.percentChance(5)) {
+                    beamDebris(beam2Coords)
+                }
+                drawEyeBeam(eye3X, eye3Y, beam3Coords)
+                timer.after(10, function () {
+                    witherStormEyeTrace.fill(0)
+                })
+            }
         }
     }
 })
@@ -33062,209 +33751,5 @@ game.onUpdateInterval(20, function () {
         timer.after(10, function () {
             OrbitalLaserRaytrace.fill(0)
         })
-    }
-})
-game.onUpdateInterval(20, function () {
-    if (witherStormActive) {
-        if (showWitherBeam) {
-            drawEyeBeam(eye1X, eye1Y, beam1Coords)
-            if (Math.percentChance(5)) {
-                beamDebris(beam1Coords)
-            }
-            drawEyeBeam(eye2X, eye2Y, beam2Coords)
-            if (Math.percentChance(5)) {
-                beamDebris(beam2Coords)
-            }
-            drawEyeBeam(eye3X, eye3Y, beam3Coords)
-            timer.after(10, function () {
-                witherStormEyeTrace.fill(0)
-            })
-        }
-    }
-})
-forever(function () {
-    if (health <= 0) {
-        game.setDialogFrame(img`
-            c c c c c c c c c c c c c c c 
-            c 2 2 2 2 2 2 2 2 2 2 2 2 2 c 
-            c 2 c c c c c c c c c c c 2 c 
-            c 2 c 3 c 3 3 3 3 3 c 3 c 2 c 
-            c 2 c c 3 c c c c c 3 c c 2 c 
-            c 2 c 3 c c c c c c c 3 c 2 c 
-            c 2 c 3 c c c c c c c 3 c 2 c 
-            c 2 c 3 c c c c c c c 3 c 2 c 
-            c 2 c 3 c c c c c c c 3 c 2 c 
-            c 2 c 3 c c c c c c c 3 c 2 c 
-            c 2 c c 3 c c c c c 3 c c 2 c 
-            c 2 c 3 c 3 3 3 3 3 c 3 c 2 c 
-            c 2 c c c c c c c c c c c 2 c 
-            c 2 2 2 2 2 2 2 2 2 2 2 2 2 c 
-            c c c c c c c c c c c c c c c 
-            `)
-        if (Math.percentChance(25)) {
-            game.setDialogCursor(img`
-                ..............................
-                ..............................
-                ..............................
-                ..............................
-                ..............................
-                ..............................
-                ...........ffffffff...........
-                .........ff11111111ff.........
-                ........f111111111111f........
-                ........f111111111111f........
-                .......f11fff1111fff11f.......
-                .......f1ffff1111ffff1f.......
-                .......f1ffff1111ffff1f.......
-                .......f1ffff1111ffff1f.......
-                .......f1fff71ff17fff1f.......
-                .......f111771ff177111f.......
-                .......f11177111197111f.......
-                ........fff77111197fff........
-                ..........f97111197f..........
-                ..........f971ff177f..........
-                ..........f971ff177f..........
-                ...........97ffff79...........
-                ........7799777777977.........
-                ......77777777779999777.......
-                .....7779999777777777777......
-                ......77777777999779777.......
-                ........7777777777777.........
-                ..............................
-                ..............................
-                ..............................
-                `)
-        } else if (Math.percentChance(25)) {
-            game.setDialogCursor(img`
-                ..............................
-                ...............2..............
-                ...............2..............
-                ..............................
-                ......2..................2....
-                ......22.....22222......22....
-                ...........ffff2fffff.........
-                .........ff111fff1111ff.......
-                ........f111ffff1111111f......
-                ........f11111fff111111f......
-                .......f111ff11fff1ff111f.....
-                .......f11fff1ffff1ff111f.....
-                ...222.f11fffffff11fff11f.222.
-                .......f11fff1fff11fff11f.....
-                .......f11ff11ffff11ff11f.....
-                .......f11111ff2ff111111f.....
-                .......f1111ff22ff111111f.....
-                ........fff1ff22ff111fff......
-                ..........f11f2ff1f11f........
-                ......2...f1ff22ff1f1f...2....
-                .....2....f1f2f22f1f1f....2...
-                ...........ff2f.2ffff.........
-                .............22.2.............
-                .............2..2.............
-                .............2................
-                ..............................
-                ..............................
-                ..............................
-                ..............................
-                ..............................
-                `)
-        } else if (Math.percentChance(25)) {
-            game.setDialogCursor(img`
-                ..............................
-                .............cc...............
-                ............caac..............
-                ............caac..............
-                .............cc...............
-                ..........2..ee..2............
-                ..........2..dd..2............
-                .......2.....ee.....2.........
-                ........2..ccddcc..2..........
-                ..........cccccccc............
-                ......22....abba....22........
-                ...........ffbbafff...........
-                .........ff1fbbaf21ff.........
-                ........f1f122bf1111ff........
-                ........f111122211111f........
-                .......f111111f2111111f.......
-                .......f11f1f1121f1f11f.......
-                .......f111f111211f111f.......
-                .......f11f1f1111f1f11f.......
-                .......f111111ff111111f.......
-                .......f11111ffff11111f.......
-                .......f11111ffff11111f.......
-                ........fff11111111fff........
-                ..........f11111111f..........
-                ..........f1f1ff1f1f..........
-                ..........f1f1ff1f1f..........
-                ...........ffffffff...........
-                ..............................
-                ..............................
-                ..............................
-                `)
-        } else {
-            game.setDialogCursor(img`
-                ..............................
-                .........................5....
-                ............55544....55.......
-                ...........555444..5555..2....
-                ...........55442..5555..42....
-                .......5..55542225555..422....
-                ......55..5ffffffff55.4224....
-                .........ff11111111ff44224....
-                ........f111111111111f2224....
-                ........f111111111111f2224....
-                .......f111ff1111ff111f224....
-                .......f11fff1111fff11f22.....
-                .......f11fff1111fff11f2......
-                .......f11fff1111fff11f2......
-                ......5f11ff11ff14ff11f..2....
-                ......5f111111f4441111f2.2....
-                .....55f11111144441111f2......
-                .....554fff11144444fff22......
-                .....55444f11444244f4222......
-                ......5544f1444224442222......
-                ......5554f4442224442222......
-                .......5544444222442222.......
-                ........5544422222222.........
-                ..............................
-                ..............................
-                ..............................
-                ..............................
-                ..............................
-                ..............................
-                ..............................
-                `)
-        }
-        game.setDialogTextColor(1)
-        if (Math.percentChance(20)) {
-            game.setGameOverMessage(false, "WHAT A FAILURE")
-        } else if (Math.percentChance(20)) {
-            game.setGameOverMessage(false, "YOU. JUST. LOST.")
-        } else if (Math.percentChance(20)) {
-            game.setGameOverMessage(false, "SO MUCH FOR BEING A HERO")
-        } else if (Math.percentChance(20)) {
-            game.setGameOverMessage(false, "WOW. EMBARASSING.")
-        } else {
-            game.setGameOverMessage(false, "YOU DIED, RESPAWN?")
-        }
-        game.setGameOverPlayable(false, music.melodyPlayable(music.bigCrash), false)
-        game.gameOver(false)
-    }
-})
-forever(function () {
-    if (shieldHP <= 0 && !(BedrockShield)) {
-        sprites.destroy(shield)
-        blocking = false
-    }
-    if (blocking == true) {
-        if (BedrockShield) {
-            shield.y = xTear.y + 1
-            shield.x = xTear.x + 3
-        } else {
-            shield.y = xTear.y + 1
-            shield.x = xTear.x + 2
-        }
-    } else {
-        shield.y = xTear.y
-        shield.x = 250
     }
 })
