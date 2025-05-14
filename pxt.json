@@ -1,5 +1,5 @@
 {
-    "name": "XTEAR'S ADVENTURE x23.5 - Copy",
+    "name": "XTEAR'S ADVENTURE x24",
     "description": "",
     "dependencies": {
         "device": "*",
@@ -28,7 +28,7 @@
         "branch": "v1.12.53",
         "tag": "v1.12.53",
         "commits": "https://github.com/microsoft/pxt-arcade/commits/68ac01b09ebda8b6baba806d4b60e80553848600",
-        "target": "2.0.48",
+        "target": "2.0.56",
         "pxt": "8.5.63",
         "targetId": "arcade"
     },

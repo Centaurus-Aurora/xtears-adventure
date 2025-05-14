@@ -1388,11 +1388,9 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.mob, function (sprite, otherSpri
         if (attack == 1) {
             if (canCrit) {
                 mobDamageProcessingSystem(swordDamage * 2, otherSprite)
-                otherSprite.sayText(sprites.readDataNumber(otherSprite, "Health"), 200, false)
                 otherSprite.startEffect(effects.fountain, 200)
             } else {
                 mobDamageProcessingSystem(swordDamage * 1, otherSprite)
-                otherSprite.sayText(sprites.readDataNumber(otherSprite, "Health"), 200, false)
             }
             if (sprites.readDataNumber(otherSprite, "Health") <= 0) {
                 otherSprite.x += 7
@@ -25202,8 +25200,13 @@ scene.onHitWall(SpriteKind.mob, function (sprite, location) {
     sprites.setDataNumber(sprite, "Health", 0)
 })
 function NextLevel (Level: number) {
-    levelBanner(Level)
+    timer.after(50, function () {
+        updateSaturationHealthDisplay()
+        updateArmorSystem()
+        levelBanner(Level)
+    })
     if (Level == 1) {
+        OverworldBackgroundSequence()
         timer.after(1500, function () {
             timer.background(function () {
                 pause(1500)
@@ -25222,6 +25225,7 @@ function NextLevel (Level: number) {
                 timer.background(function () {
                     pauseUntil(() => !(isMobRemaining))
                     runGame = false
+                    updateSaturationHealthDisplay()
                     splashLevelStats()
                     timer.after(9000, function () {
                         specialLootRoll(false)
@@ -25229,6 +25233,7 @@ function NextLevel (Level: number) {
                             pauseUntil(() => !(delayMap))
                             if (levelUnlocked <= Level) {
                                 levelUnlocked += 1
+                                mapSelection = levelUnlocked
                             }
                             map()
                         })
@@ -25238,6 +25243,7 @@ function NextLevel (Level: number) {
         })
     }
     if (Level == 2) {
+        OverworldBackgroundSequence()
         timer.after(1500, function () {
             timer.background(function () {
                 pause(1500)
@@ -25264,6 +25270,7 @@ function NextLevel (Level: number) {
                 timer.background(function () {
                     pauseUntil(() => !(isMobRemaining))
                     runGame = false
+                    updateSaturationHealthDisplay()
                     splashLevelStats()
                     timer.after(9000, function () {
                         specialLootRoll(false)
@@ -25271,6 +25278,7 @@ function NextLevel (Level: number) {
                             pauseUntil(() => !(delayMap))
                             if (levelUnlocked <= Level) {
                                 levelUnlocked += 1
+                                mapSelection = levelUnlocked
                             }
                             map()
                         })
@@ -25280,6 +25288,7 @@ function NextLevel (Level: number) {
         })
     }
     if (Level == 3) {
+        OverworldBackgroundSequence()
         timer.after(1500, function () {
             timer.background(function () {
                 pause(1500)
@@ -25288,7 +25297,15 @@ function NextLevel (Level: number) {
                 })
                 pause(3000)
                 timer.background(function () {
-                    spawnMob(0, 0, false)
+                    spawnMob(0, 6, false)
+                })
+                pause(1500)
+                timer.background(function () {
+                    spawnMob(0, 3, false)
+                })
+                pause(1000)
+                timer.background(function () {
+                    spawnMob(0, 2, false)
                 })
                 pause(3000)
                 timer.background(function () {
@@ -25296,7 +25313,7 @@ function NextLevel (Level: number) {
                 })
                 pause(1500)
                 timer.background(function () {
-                    spawnMob(0, 1, false)
+                    spawnMob(0, 6, false)
                 })
                 pause(1500)
                 timer.background(function () {
@@ -25306,6 +25323,7 @@ function NextLevel (Level: number) {
                 timer.background(function () {
                     pauseUntil(() => !(isMobRemaining))
                     runGame = false
+                    updateSaturationHealthDisplay()
                     splashLevelStats()
                     timer.after(9000, function () {
                         specialLootRoll(false)
@@ -25313,6 +25331,7 @@ function NextLevel (Level: number) {
                             pauseUntil(() => !(delayMap))
                             if (levelUnlocked <= Level) {
                                 levelUnlocked += 1
+                                mapSelection = levelUnlocked
                             }
                             map()
                         })
@@ -25321,107 +25340,110 @@ function NextLevel (Level: number) {
             })
         })
     }
+    if (Level == 4) {
+        NetherBackgroundSequence()
+        timer.after(1500, function () {
+            timer.background(function () {
+                pause(1500)
+                timer.background(function () {
+                    spawnMob(1, 1, false)
+                })
+                pause(8000)
+                timer.background(function () {
+                    spawnMob(1, 7, false)
+                })
+                pause(5000)
+                timer.background(function () {
+                    pauseUntil(() => !(isMobRemaining))
+                    runGame = false
+                    updateSaturationHealthDisplay()
+                    splashLevelStats()
+                    timer.after(9000, function () {
+                        specialLootRoll(false)
+                        timer.after(11500, function () {
+                            pauseUntil(() => !(delayMap))
+                            if (levelUnlocked <= Level) {
+                                levelUnlocked += 2
+                                mapSelection = levelUnlocked
+                            }
+                            map()
+                        })
+                    })
+                })
+            })
+        })
+    }
+    if (Level == 6) {
+        startStorm()
+    }
 }
 sprites.onOverlap(SpriteKind.StatBlock, SpriteKind.StatBlock, function (sprite, otherSprite) {
     sprites.destroy(sprite, effects.disintegrate, 50)
 })
 sprites.onOverlap(SpriteKind.Player, SpriteKind.armorDrop, function (sprite, otherSprite) {
     if (otherSprite == iron_helmet) {
-        sprites.destroy(otherSprite)
         IronSet += 1
-        music.play(music.melodyPlayable(music.baDing), music.PlaybackMode.InBackground)
         info.changeScoreBy(1000)
         currentArmorEquipped[1] = 2
-        updateArmorSystem()
     }
     if (otherSprite == iron_chestplate) {
-        sprites.destroy(otherSprite)
         IronSet += 1
-        music.play(music.melodyPlayable(music.baDing), music.PlaybackMode.InBackground)
         info.changeScoreBy(1000)
         currentArmorEquipped[2] = 2
-        updateArmorSystem()
     }
     if (otherSprite == iron_leggings) {
-        sprites.destroy(otherSprite)
         IronSet += 1
-        music.play(music.melodyPlayable(music.baDing), music.PlaybackMode.InBackground)
         info.changeScoreBy(1000)
         currentArmorEquipped[3] = 2
-        updateArmorSystem()
     }
     if (otherSprite == iron_boots) {
-        sprites.destroy(otherSprite)
         IronSet += 1
-        music.play(music.melodyPlayable(music.baDing), music.PlaybackMode.InBackground)
         info.changeScoreBy(1000)
         currentArmorEquipped[4] = 2
-        updateArmorSystem()
     }
     if (otherSprite == golden_helmet) {
-        sprites.destroy(otherSprite)
         GoldSet += 1
-        music.play(music.melodyPlayable(music.baDing), music.PlaybackMode.InBackground)
         info.changeScoreBy(100)
         currentArmorEquipped[1] = 1
-        updateArmorSystem()
     }
     if (otherSprite == golden_chestplate) {
-        sprites.destroy(otherSprite)
         GoldSet += 1
-        music.play(music.melodyPlayable(music.baDing), music.PlaybackMode.InBackground)
         info.changeScoreBy(100)
         currentArmorEquipped[2] = 1
-        updateArmorSystem()
     }
     if (otherSprite == golden_leggings) {
-        sprites.destroy(otherSprite)
         GoldSet += 1
-        music.play(music.melodyPlayable(music.baDing), music.PlaybackMode.InBackground)
         info.changeScoreBy(100)
         currentArmorEquipped[3] = 1
-        updateArmorSystem()
     }
     if (otherSprite == golden_boots) {
-        sprites.destroy(otherSprite)
         GoldSet += 1
-        music.play(music.melodyPlayable(music.baDing), music.PlaybackMode.InBackground)
         info.changeScoreBy(100)
         currentArmorEquipped[4] = 1
-        updateArmorSystem()
     }
     if (otherSprite == diamond_helmet) {
-        sprites.destroy(otherSprite)
         DiamondSet += 1
-        music.play(music.melodyPlayable(music.baDing), music.PlaybackMode.InBackground)
         info.changeScoreBy(10000)
         currentArmorEquipped[1] = 3
-        updateArmorSystem()
     }
     if (otherSprite == diamond_chestplate) {
-        sprites.destroy(otherSprite)
         DiamondSet += 1
-        music.play(music.melodyPlayable(music.baDing), music.PlaybackMode.InBackground)
         info.changeScoreBy(10000)
         currentArmorEquipped[2] = 3
-        updateArmorSystem()
     }
     if (otherSprite == diamond_leggings) {
-        sprites.destroy(otherSprite)
         DiamondSet += 1
-        music.play(music.melodyPlayable(music.baDing), music.PlaybackMode.InBackground)
         info.changeScoreBy(10000)
         currentArmorEquipped[3] = 3
-        updateArmorSystem()
     }
     if (otherSprite == diamond_boots) {
-        sprites.destroy(otherSprite)
         DiamondSet += 1
-        music.play(music.melodyPlayable(music.baDing), music.PlaybackMode.InBackground)
         info.changeScoreBy(10000)
         currentArmorEquipped[4] = 3
-        updateArmorSystem()
     }
+    sprites.destroy(otherSprite)
+    music.play(music.melodyPlayable(music.baDing), music.PlaybackMode.InBackground)
+    updateArmorSystem()
 })
 function hideArmorHUD () {
     if (ShowingArmorHUD) {
@@ -28318,8 +28340,6 @@ function playLevel (mapSelection: number) {
     mapActive = false
     runGame = true
     Level = mapSelection
-    updateSaturationHealthDisplay()
-    updateArmorSystem()
     NextLevel(mapSelection)
 }
 function waitForPlay () {
@@ -30721,7 +30741,7 @@ function RNG () {
     } else if (info.score() > 2500 && Math.percentChance(Math.min(100, 20 + Math.abs(info.score() / 500)))) {
         RNGroll = 2
         return RNGroll
-    } else if (info.score() > 500 && Math.percentChance(40)) {
+    } else if (info.score() > 500) {
         RNGroll = 3
         return RNGroll
     } else {
@@ -32532,7 +32552,6 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.Food, function (sprite, otherSpr
         }
         sprites.destroy(otherSprite, effects.hearts, 100)
         saturation += 4
-        updateSaturationHealthDisplay()
         if (Math.percentChance(33)) {
             story.spriteSayText(sprite, "THAT'S DELICIOUS!!!", 4, 12, story.TextSpeed.Fast)
         } else if (Math.percentChance(50)) {
@@ -32545,8 +32564,8 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.Food, function (sprite, otherSpr
         sprites.destroy(otherSprite, effects.hearts, 100)
         saturation += 2
     }
-    updateSaturationHealthDisplay()
     music.play(music.createSoundEffect(WaveShape.Triangle, 1, 864, 255, 0, 75, SoundExpressionEffect.None, InterpolationCurve.Logarithmic), music.PlaybackMode.InBackground)
+    updateSaturationHealthDisplay()
 })
 sprites.onOverlap(SpriteKind.Player, SpriteKind.Explosion, function (sprite, otherSprite) {
     damageProcessingSystem(sprites.readDataNumber(otherSprite, "ExplosionDamage") * 2)
@@ -32567,7 +32586,6 @@ function damageProcessingSystem (damage: number) {
                 }
                 music.play(music.createSoundEffect(WaveShape.Square, 200, 1, 255, 0, 100, SoundExpressionEffect.None, InterpolationCurve.Curve), music.PlaybackMode.InBackground)
                 scene.cameraShake(4, 50)
-                updateSaturationHealthDisplay()
                 if (holdingTrident) {
                     if (netheriteUpgrade) {
                         animation.runImageAnimation(
@@ -32727,6 +32745,7 @@ function damageProcessingSystem (damage: number) {
             invincibilityFrame = false
         })
     }
+    updateSaturationHealthDisplay()
     if (health <= 0) {
         game.setDialogFrame(img`
             c c c c c c c c c c c c c c c 
